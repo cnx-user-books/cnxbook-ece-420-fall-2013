@@ -1,0 +1,313 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML">
+  <title>Lab 3: Prelab (Part 1)</title>
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45719</md:content-id>
+  <md:title>Lab 3: Prelab (Part 1)</md:title>
+  <md:abstract>You will derive the transfer function of a second-order, Direct Form II, infinite impulse response (IIR) filter.  Then you will create a fourth-order IIR filter, plot its frequency response, and decompose the fourth-order filter into two second-order sections, choosing an appropriate gain for each stage to prevent overflow.</md:abstract>
+  <md:uuid>47022bc8-07af-4385-b3bf-fe12497a9c23</md:uuid>
+</metadata>
+<featured-links>
+  <!-- WARNING! The 'featured-links' section is read only. Do not edit below.
+       Changes to the links section in the source will not be saved. -->
+    <link-group type="supplemental">
+      <link url="http://cnx.org/content/m45720/latest/" strength="3">Lab 3: Prelab (Part 2)</link>
+    </link-group>
+  <!-- WARNING! The 'featured-links' section is read only. Do not edit above.
+       Changes to the links section in the source will not be saved. -->
+</featured-links>
+<content>
+    <section id="sec2">
+      
+      <para id="p4">The transfer function for the second-order section shown in
+	<link document="m45721" target-id="fig1">Lab 3: IIR Filters Overview</link> is
+
+	<equation id="eqn1"><m:math>
+	    <m:apply>
+	      <m:eq/>
+	      <m:apply>
+		<m:ci type="fn">H</m:ci>
+		<m:ci>z</m:ci>
+	      </m:apply>
+	      <m:apply>
+		<m:times/>
+		<m:ci>G</m:ci>
+		<m:apply>
+		  <m:divide/>
+		  <m:apply>
+		    <m:plus/>
+		    <m:cn>1</m:cn>
+		    <m:apply>
+		      <m:times/>
+		      <m:ci><m:msub>
+			  <m:mi>b</m:mi>
+			  <m:mn>1</m:mn>
+			</m:msub></m:ci>
+		      <m:apply>
+			<m:power/>
+			<m:ci>z</m:ci>
+			<m:cn>-1</m:cn>
+		      </m:apply>
+		    </m:apply>
+		    <m:apply>
+		      <m:times/>
+		      <m:ci><m:msub>
+			  <m:mi>b</m:mi>
+			  <m:mn>2</m:mn>
+			</m:msub></m:ci>
+		      <m:apply>
+			<m:power/>
+			<m:ci>z</m:ci>
+			<m:cn>-2</m:cn>
+		      </m:apply>
+		    </m:apply>
+		  </m:apply>
+		  <m:apply>
+		    <m:plus/>
+		    <m:cn>1</m:cn>
+		    <m:apply>
+		      <m:times/>
+		      <m:ci><m:msub>
+			  <m:mi>a</m:mi>
+			  <m:mn>1</m:mn>
+			</m:msub></m:ci>
+		      <m:apply>
+			<m:power/>
+			<m:ci>z</m:ci>
+			<m:cn>-1</m:cn>
+		      </m:apply>
+		    </m:apply>
+		    <m:apply>
+		      <m:times/>
+		      <m:ci><m:msub>
+			  <m:mi>a</m:mi>
+			  <m:mn>2</m:mn>
+			</m:msub></m:ci>
+		      <m:apply>
+			<m:power/>
+			<m:ci>z</m:ci>
+			<m:cn>-2</m:cn>
+		      </m:apply>
+		    </m:apply>
+		  </m:apply>
+		</m:apply>
+	      </m:apply>
+	    </m:apply>
+	  </m:math>
+	</equation></para><section id="sec2a">
+	<title>Exercise</title>
+	<para id="p5">First, derive the above transfer function from the block diagram.  Begin by writing
+	  the <term>difference equations</term> for
+	  <m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">w</m:ci>
+	      <m:ci>n</m:ci>
+	    </m:apply>
+	  </m:math> in terms of the input and past values 
+	  (<m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">w</m:ci>
+	      <m:apply>
+		<m:minus/>
+		<m:ci>n</m:ci>
+		<m:cn>1</m:cn>
+	      </m:apply>
+	    </m:apply>
+	  </m:math> and 
+	  <m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">w</m:ci>
+	      <m:apply>
+		<m:minus/>
+		<m:ci>n</m:ci>
+		<m:cn>2</m:cn>
+	      </m:apply>
+	    </m:apply>
+	  </m:math>).  Then write the difference equation for 
+	  <m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">y</m:ci>
+	      <m:ci>n</m:ci>
+	    </m:apply>
+	  </m:math> also in terms of the past samples of 
+	  <m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">w</m:ci>
+	      <m:ci>n</m:ci>
+	    </m:apply>
+	  </m:math>.  After finding the two difference equations,
+	  compute the corresponding Z-transforms and use the relation
+	  <m:math>
+	    <m:apply>
+	      <m:eq/>
+	      <m:apply>
+		<m:ci type="fn">H</m:ci>
+		<m:ci>z</m:ci>
+	      </m:apply>
+	      <m:apply>
+		<m:divide/>
+		<m:apply>
+		  <m:ci type="fn">Y</m:ci>
+		  <m:ci>z</m:ci>
+		</m:apply>
+		<m:apply>
+		  <m:ci type="fn">X</m:ci>
+		  <m:ci>z</m:ci>
+		</m:apply>
+	      </m:apply>
+	      <m:apply>
+		<m:divide/>
+		<m:apply>
+		  <m:times/>
+		  <m:apply>
+		    <m:ci type="fn">Y</m:ci>
+		    <m:ci>z</m:ci>
+		  </m:apply>
+		  <m:apply>
+		    <m:ci type="fn">W</m:ci>
+		    <m:ci>z</m:ci>
+		  </m:apply>
+		</m:apply>
+		<m:apply>
+		  <m:times/>
+		  <m:apply>
+		    <m:ci type="fn">W</m:ci>
+		    <m:ci>z</m:ci>
+		  </m:apply>
+		  <m:apply>
+		    <m:ci type="fn">X</m:ci>
+		    <m:ci>z</m:ci>
+		  </m:apply>
+		</m:apply>
+	      </m:apply>
+	    </m:apply>
+	  </m:math> to verify the IIR transfer function in <link target-id="eqn1"/>.
+	</para><para id="p6">
+	  Next, design the coefficients for a fourth-order filter
+	  implemented as the cascade of two bi-quad sections.  Write a
+	  MATLAB script to compute the coefficients.  Begin by
+	  designing the fourth-order filter and checking the response
+	  using the MATLAB commands
+	</para>
+	<code id="id1168951223780" display="block">
+	  
+	  [B,A] = ellip(4,.25,10,.25) 
+	  freqz(B,A)
+	  
+	</code>
+	<para id="p6a">
+	  <note id="id5886947" type="Note"><label>Note</label>MATLAB's <term><code>freqz</code></term>
+	    command displays the frequency responses of IIR filters
+	    and FIR filters.  For more information about this, type
+	    <code>doc freqz</code>.  Be sure to look at MATLAB's
+	    definition of the transfer function.  </note><note id="id8912809" type="Note"><label>Note</label>If you use the <code>freqz</code> command as
+	    shown above, without passing its returned data to another
+	    function, both the magnitude (in decibels) and the phase
+	    of the response will be shown.
+	  </note>
+	</para>
+	<para id="p7">
+	  Next you must find the roots of the numerator,
+	  <term>zeros</term>, and roots of the denominator,
+	  <term>poles</term>, so that you can group them to create two
+	  second-order sections.  The MATLAB commands
+	  <code>roots</code> and <code>poly</code> will be useful for
+	  this task.  Save the scripts you use to decompose your
+	  filter into second-order sections; they will probably be
+	  useful later.
+	</para>
+	<para id="p8">Once you have obtained the coefficients for each of your two
+	  second-order sections, you are ready to choose a
+	  <term>gain</term> factor, 
+	  <m:math>
+	    <m:ci>G</m:ci>
+	  </m:math>, for each section.  As part of your MATLAB script,
+	  use <code>freqz</code> to compute the response
+	  <m:math>
+	    <m:apply>
+	      <m:divide/>
+	      <m:apply>
+		<m:ci type="fn">W</m:ci>
+		<m:ci>z</m:ci>
+	      </m:apply>
+	      <m:apply>
+		<m:ci type="fn">X</m:ci>
+		<m:ci>z</m:ci>
+	      </m:apply>
+	    </m:apply>
+	  </m:math> with 
+	  <m:math display="inline">
+	    <m:apply>
+	      <m:eq/>
+	      <m:ci>G</m:ci>
+	      <m:cn>1</m:cn>
+	    </m:apply>
+	  </m:math> for each of the sets of second-order coefficients.
+	  Recall that on the DSP we do not represent numbers greater
+	  than or equal to 1.0.  If the maximum value of
+	  <m:math>
+	    <m:apply>
+	      <m:abs/>
+	      <m:apply>
+		<m:divide/>
+		<m:apply>
+		  <m:ci type="fn">W</m:ci>
+		  <m:ci>z</m:ci>
+		</m:apply>
+		<m:apply>
+		  <m:ci type="fn">X</m:ci>
+		  <m:ci>z</m:ci>
+		</m:apply>
+	      </m:apply>
+	    </m:apply>
+	  </m:math> is or exceeds 1.0, an input with magnitude less
+	  than one could produce
+	  <m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">w</m:ci>
+	      <m:ci>n</m:ci>
+	    </m:apply>
+	  </m:math> terms with magnitude greater than or equal to one;
+	  this is <term>overflow</term>.  You must therefore select a
+	  gain values for each second-order section such that the
+	  response from the input to the states,
+	  <m:math>
+	    <m:apply>
+	      <m:divide/>
+	      <m:apply>
+		<m:ci type="fn">W</m:ci>
+		<m:ci>z</m:ci>
+	      </m:apply>
+	      <m:apply>
+		<m:ci type="fn">X</m:ci>
+		<m:ci>z</m:ci>
+	      </m:apply>
+	    </m:apply>
+	  </m:math>, is always less than one in magnitude.  In other
+	  words, set the value of 
+	  <m:math>
+	    <m:ci>G</m:ci>
+	  </m:math> to ensure that
+	  <m:math>
+	    <m:apply>
+	      <m:lt/>
+	      <m:apply>
+		<m:abs/>
+		<m:apply>
+		  <m:divide/>
+		  <m:apply>
+		    <m:ci type="fn">W</m:ci>
+		    <m:ci>z</m:ci>
+		  </m:apply>
+		  <m:apply>
+		    <m:ci type="fn">X</m:ci>
+		    <m:ci>z</m:ci>
+		  </m:apply>
+		</m:apply>
+	      </m:apply>
+	      <m:cn>1</m:cn>
+	    </m:apply>
+	  </m:math>.
+	</para></section><para id="eip-618">After finishing Part 1, move on to <link document="m45720">Lab 3: Prelab (Part 2)</link>, where you explore and learn how to mitigate the effects of quantization.</para></section>
+
+  </content>
+  </document>

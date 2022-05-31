@@ -1,0 +1,33 @@
+<document xmlns="http://cnx.rice.edu/cnxml">
+
+<title>Lab 5: Prelab 5</title>
+<metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45780</md:content-id>
+  <md:title>Lab 5: Prelab 5</md:title>
+  <md:abstract>Histogram equalization and color space conversion</md:abstract>
+  <md:uuid>7b1f1b30-b0cd-4700-9fa7-b79d5e405d83</md:uuid>
+</metadata>
+
+<content>
+  <para id="eip-595">Please download the <link resource="eco.TIF">eco.tiff</link>, <link resource="lena.tiff">lena.tiff</link> and copy them into your Matlab current workspace before continuing.</para><section id="eip-776"><title>Overview</title><para id="eip-843">Digital images are made up of picture elements, more commonly known as pixels arranged in a rectangular grid. Three frequently encountered image formats are: 
+</para><para id="eip-167"><emphasis>Binary image</emphasis>: are 2D arrays which has only two values 1 or 0 where 1 corresponds to white and 0 corresponds to black.
+</para><para id="eip-582"><emphasis>Intensity or grey scale image</emphasis>: are 2D arrays where pixel intensities have a n-bit representation. For example, an 8-bit image has a variation from 0 to 255 where 0 represents black, 255 represents white and intermediate values correspond to gray levels that span the range from black to white.
+
+</para><para id="eip-949"><emphasis>RGB color images</emphasis> are 3D arrays that assign three numerical values to each pixel, each value correponds to the red, green, and blue image channel, respectively. </para></section><section id="eip-122"><title>I.   Image enhancement</title><para id="eip-444">One simple image enhancement method is increasing the image brightness.
+	
+Read one of Matlab's default image <code>cameraman.tif</code> by using <code>imread(‘cameraman.tif’)</code>, then increase its brightness by using the <code>imageadd</code> function. To show the image, use the function <code>imshow</code>. What is the dynamic range (the number of distinct pixel values in an image)  of the orginal and the enhanced image?
+
+Now try to enhance the <code>eco.tif</code> image. Could you enhance the quality of the image by simply increasing its brightness?
+</para></section><section id="eip-939"><title>II.                Histogram equalization</title><para id="eip-639">Histogram equalization is one of the most commonly used image contrast enhancement technique. The approach is to design a transformation in such a way that the gray values in the output image are uniformly distributed. You’ll have a chance to implement histogram equalization in C in lab 4.
+</para><para id="eip-769">For this part, use Matlab built in function <code>histeq</code> to perform the histogram equalization on the <code>eco.tif </code> , then save the image in Bitmap format to the disk.
+</para><para id="eip-574"><emphasis>Question</emphasis>: Can you improve the result of enhancement by repeating the histogram equalization? Why?</para></section><section id="eip-570"><title>III.           Color spaces conversion:</title><para id="eip-366">
+An artist might mix their primary colors on a palette to visualize the color they want to pick. A color space is like a digital palette but a more precisely organized one. Learning to visualize the color space will help you envision the suitable one for your image processing task.
+</para><para id="eip-978">1.	We will first look at the popular RGB color space. Load the Lena image into the Matlab workspace. The color image in Matlab is represented as a three dimensional array (M×N×3) or ((M×N×3) depending on the color model RGB, CMYK, HSL. 
+We will first look at the popular RGB color space. Load the Lena image into Matlab workspace. Zero out two channels and keep one channel intact. Display the result. 
+</para><para id="eip-330"><emphasis>Question</emphasis>:What do the three channels represent, and explain how would modifying each of the channels would change the image?</para><para id="eip-220">2. Now we investigate a different color space called HSV which is more closely related to our  perception of color.
+
+We will reuse the Lena image. Convert the Lena image, which is in RGB color space, into HSV color space. To understand the significance of each channel, apply different scaling for each channel as follows. Scale the magnitude of the H channel by 0.1, 0.5 and 0.7. Combine your scaled H with the unscaled S and V channels, transform to RGB image and display it. Repeat the previous step for S and  V channel.</para><para id="eip-295"><emphasis>Question</emphasis>: What do the three channels represent, and explain how would modifying each of the channels would change the image?</para></section><section id="eip-163"><title>IV.           Histogram equalization on color image:</title><para id="eip-196">Apply the histogram equalization to the three channels of the Lena image in RGB color space, combine and display the result.
+</para><para id="eip-913"><emphasis>Question</emphasis>: if you are to apply the histogram equalization on HSV image, which channels would you use? Why?</para><para id="eip-998">Use your answer to do the histogram equalization in the HSV color space on the Lena image.</para><para id="eip-201">Which color spaces should we use when we perform the histogram equalization? Why?
+</para></section></content>
+
+</document>

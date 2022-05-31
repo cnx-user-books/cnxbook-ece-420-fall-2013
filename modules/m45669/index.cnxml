@@ -1,0 +1,274 @@
+<document xmlns="http://cnx.rice.edu/cnxml">
+  
+  <title>Lab 1: Prelab</title>
+
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45669</md:content-id>
+  <md:title>Lab 1: Prelab</md:title>
+  <md:abstract>You will work through a section of TI TMS320C55x assembly code by hand.  The instructions include multiplication of fractional numbers in two's complement representation.</md:abstract>
+  <md:uuid>d82ad0cf-fd97-4c71-9516-e17030304957</md:uuid>
+</metadata>
+
+<content>
+    <section id="sec1">
+      <title>Assembly Exercise</title>
+      <para id="p1">Analyze the following lines of code.  Refer to <link window="new" document="m10808">Two's Complement and Fractional Arithmetic
+	for 16-bit Processors</link>, <link window="new" document="m14262">Addressing Modes for TI TMS320C55x</link>,
+	and the <link window="new" url="http://focus.ti.com/lit/ug/spru374g/spru374g.pdf"> Mnemonic
+	Instruction Set</link> manual for help.
+      </para><code id="id1166157824616" display="block">
+	1  FIR_len .set    3
+        2
+	3  ; Assume: 
+	4  ;   BK03 = FIR_len
+	5  ;   firStateIndex is stored at memory location 1008h 
+	6  ;   AR2 = 1000h
+	7  ;   AR3 = 1004h
+	8  ;   FRCT = 1
+        9
+	10      BSET	AR3LC		; sets circular addressing for AR3
+        11      mov  mmap(AR3), BSA23
+        12      mov  #firStateIndex, AR4
+        13      mov  *AR4, AR3
+	14      mov     LO(AC0),*AR3+
+        15      mov     #0, AC0
+	16      rpt    #(FIR_len-1)
+	17      macm     *AR2+,*AR3+,AC0
+	
+      </code>
+      <para id="p2">Anything following a "<code>;</code>" is considered a comment.
+	In this case, the comments indicate the contents of the
+	auxiliary registers, the <code>BK03</code> register, and the address registers before the execution of
+	the first instruction, <code>mov</code>.  
+        The line <code>FIR_len .set 3</code> defines the name FIR_len as equal to 3. The <code>BK03</code> register contains the length of the 
+        circular buffer we want to use for auxiliary register 0 through 3.  The <code>BSET AR3LC</code> modifies the increment operator <code>+</code> so that it
+        behaves as a circular buffer.  This means circular addressing will be used for AR3. Refer to Section 6.11 of the <link window="new" url="http://www.ti.com/lit/ug/spru371f/spru371f.pdf">CPU Reference Guide</link> for help on circular addressing. 
+    </para><para id="p2a">
+        Note that any number
+	followed by an "<code>h</code>" or preceded with a
+	<code>0x</code> represents a <term>hexadecimal</term> value.
+      </para>
+      <example id="example1">
+	<para id="p2b">
+	  1000h and 0x1000 both refer to the decimal number 4096.
+	</para>
+      </example>
+      <para id="p3">
+	Assume that the data memory is initialized as follows starting
+	at location <code>1000h</code>.
+      </para>
+
+<table id="table1fig" summary="">
+<title>Data Memory Assignment (before execution)</title>
+<tgroup cols="2"><thead>
+  <row>
+    <entry>Memory location</entry>
+    <entry>Value</entry>
+  </row>
+</thead>
+<tbody>
+  <row>
+    <entry>1000h</entry>
+    <entry>1000h</entry>
+  </row>
+  <row>
+    <entry>1001h</entry>
+    <entry>0000h</entry>
+  </row>
+  <row>
+    <entry>1002h</entry>
+    <entry>4000h</entry>
+  </row>
+  <row>
+    <entry/>
+    <entry/>
+  </row>
+  <row>
+    <entry>1004h</entry>
+    <entry>1000h</entry>
+  </row>
+  <row>
+    <entry>1005h</entry>
+    <entry>1000h</entry>
+  </row>
+  <row>
+    <entry>1006h</entry>
+    <entry>4000h</entry>
+  </row>
+  <row>
+    <entry>1007h</entry>
+    <entry>1000h</entry>
+  </row>
+  <row>
+    <entry>1008h</entry>
+    <entry>0000h</entry>
+  </row>
+</tbody>
+
+
+
+
+
+
+
+
+</tgroup>
+<caption>Data Memory Assignment (before execution)</caption></table>
+      <para id="p3b">After familiarizing yourself with the <code>mov</code>,
+	<code>rpt</code>, and <code>macm</code> instructions, step
+	through each line of code and record the values of the
+	accumulator <code>AC0</code> and auxiliary registers
+	<code>AR2</code> and <code>AR3</code> in the spaces provided
+	in <link target-id="table2fig"/>.  Additionally, record the value
+	of the memory contents after all three instructions have been
+	"executed" in the blank data memory table in <link target-id="table3fig"/>.
+      </para><table id="table2fig" frame="all" summary="">
+<tgroup cols="4"><thead>
+	      <row>
+		<entry>AC0</entry>
+		<entry>AR2</entry>
+		<entry>AR3</entry>
+		<entry/>
+	      </row>
+	    </thead>
+	    <tbody>
+	      <row>
+		<entry><code>00 0000 8000h</code></entry>
+		<entry><code>1000h</code></entry>
+		<entry><code>1004h</code></entry>
+		<entry>at start of code</entry>
+	      </row>
+	      <row>
+		<entry/>
+		<entry/>
+		<entry/>
+		<entry>after <code>mov</code> instruction line 11</entry>
+	      </row>
+	      <row>
+		<entry/>
+		<entry/>
+		<entry/>
+		<entry>after <code>mov</code> instruction line 12</entry>
+	      </row>
+<row>
+    <entry/>
+    <entry/>
+    <entry/>
+    <entry>after <code>mov</code> instruction line 13</entry>
+  </row>
+<row>
+    <entry/>
+    <entry/>
+    <entry/>
+    <entry>after <code>mov</code> instruction line 14</entry>
+  </row>
+<row>
+    <entry/>
+    <entry/>
+    <entry/>
+    <entry>after <code>mov</code> instruction line 15</entry>
+  </row>
+ <row>
+    <entry/>
+    <entry/>
+    <entry/>
+    <entry>after <code>rpt</code> instruction line 16</entry>
+  </row>
+	      <row>
+		<entry/>
+		<entry/>
+		<entry/>
+		<entry>after first <code>macm</code> instruction</entry>
+	      </row>
+	      <row>
+		<entry/>
+		<entry/>
+		<entry/>
+		<entry>
+		  after second <code>macm</code> instruction
+		</entry>
+	      </row>
+	      <row>
+		<entry/>
+		<entry/>
+		<entry/>
+		<entry>after third <code>macm</code> instruction</entry>
+	      </row>
+</tbody>
+	  
+
+
+
+
+
+
+
+
+
+</tgroup>
+<caption>Execution Results</caption></table>
+      <para id="p4">When working through the exercise, take into account that the
+	accumulator <code>AC0</code> is a 40-bit register, and that the
+	multiplier is in the <term>fractional arithmetic mode</term>.
+	In this mode, integers on the DSP are interpreted as
+	fractions, and the multiplier will treat them accordingly.
+	This is done by shifting the result of the integer multiplier
+	in the ALU left one bit. (All the arithmetic is fractional in these examples.)  
+        Multiplies performed by the ALU
+	(via the <code>macm</code> instruction) produce a result that
+	is twice what you would expect if you just multiplied the two
+	integers together.  DSP numerical representation and
+	arithmetic are described further in <link window="new" document="m10808">Two's Complement and Fractional Arithmetic
+	for 16-bit Processors</link>.
+      </para><table id="table3fig" summary="">
+<title>Data Memory Assignment (after execution)</title>
+<tgroup cols="2"><thead>
+  <row>
+    <entry>Memory location</entry>
+    <entry>Value</entry>
+  </row>
+</thead>
+<tbody>
+  <row>
+    <entry>1000h</entry>
+    <entry/>
+  </row>
+  <row>
+    <entry>1001h</entry>
+    <entry/>
+  </row>
+  <row>
+    <entry>1002h</entry>
+    <entry/>
+  </row>
+  <row>
+    <entry/>
+    <entry/>
+  </row>
+  <row>
+    <entry>1004h</entry>
+    <entry/>
+  </row>
+  <row>
+    <entry>1005h</entry>
+    <entry/>
+  </row>
+  <row>
+    <entry>1006h</entry>
+    <entry/>
+  </row>
+  <row>
+    <entry>1007h</entry>
+    <entry/>
+  </row>
+  <row>
+    <entry>1008h</entry>
+    <entry/>
+  </row>
+</tbody>
+
+</tgroup>
+<caption>Data Memory Assignment (after execution)</caption></table>
+    </section>
+  </content>
+</document>

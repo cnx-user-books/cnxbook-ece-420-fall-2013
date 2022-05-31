@@ -1,0 +1,59 @@
+<document xmlns="http://cnx.rice.edu/cnxml">
+  <title>Lab 3: Lab</title>
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45743</md:content-id>
+  <md:title>Lab 3: Lab</md:title>
+  <md:abstract>You will implement a fourth-order, elliptical, low-pass infinite impulse-response (IIR) filter as a cascade of two second-order sections.</md:abstract>
+  <md:uuid>cd011db0-04b4-49e2-ab1c-1f9e95251949</md:uuid>
+</metadata>
+
+<content>
+    <section id="import-auto-id1165206697492">
+      <title>Overview</title>
+      <para id="import-auto-id8020902">In this lab, you implement a fourth-order IIR filter completely in fixed-point C. While programming in C provides ease of coding, portability, and comprehension, fixed-point processing raises a few challenges that were handled automatically in assembly. In particular, it is the programmer's responsibility to explicitly handle overflow errors and accumulator sizing.</para><para id="import-auto-id7839936">On the DSP, you will <emphasis effect="italics">write and test</emphasis> the C function for the elliptic low-pass filter designed from <link document="m45719"><emphasis effect="underline">Prelab (Part 1)</emphasis></link>. You should not try to implement the notch filter designed in <link document="m45720">Prelab (Part 2)</link>, because it will not work correctly when implemented using Direct Form II.  (Why not?)</para><para id="eip-532">To implement the fourth-order filter, start with a single set of second-order coefficients and implement a single second-order section. A suggested outline of the implementation steps are:      </para><list id="eip-240" list-type="enumerated" number-style="arabic"><item>On paper, design the algorithm for a modular implementation of a single second-order section.</item>
+<item>Write the algorithm in C, handling truncation, overflow, saturation, and accumulator sizing.</item>
+<item>Verify functionality of this single bi-quad using the frequency sweep test-vector, and the function generator/oscilloscope.</item>
+<item>In Matlab, pair the poles and zeros to maximize the gain factors for each section, and on the DSP, verify the correct operation of each bi-quad independently.</item>
+<item>Finally, write C code to implement the cascade. The modular design of the second-order section should convince you of the benefits of C programming.</item></list></section>
+<section id="import-auto-id1165206898471">
+      <title>Part 1: Design on Paper</title><para id="import-auto-id1165206953052">The first step, and the majority of the work, is to implement a single second-order section, which was shown in <link document="m45721"><emphasis effect="underline">Figure 1</emphasis></link>. Before writing in C, carefully design and plan out the algorithm on paper in pseudo-code. For an example of how pseudo-code is used to implement an FIR filter, see this link <link document="m37136"><emphasis effect="underline">FIR filter implementation.</emphasis></link></para><para id="eip-394">From your design, you should have a very clear idea about:</para><list id="eip-442"><item>the chronological order of how the intermediate states {w[n], w[n-1], w[n-2]}, and the output, y[n] should be updated.</item>
+<item>how pointers or data should move after sample x[n] has been processed, but before x[n+1] comes in.</item>
+<item>the data types required for all buffers, accumulators, and temporary variables you may need.</item></list><exercise id="eip-184"><problem id="eip-643">
+  <para id="eip-275">
+    Which buffer should be circularly addressed: coefficients or state buffer?
+  </para>
+</problem>
+
+<solution id="eip-995">
+  <para id="eip-100">The intermediate state buffer. If you do not clearly understand why, go back to Figure 1 and spend more time on this part of the lab!
+  </para></solution>
+</exercise>
+</section><section id="eip-574"><title>Part 2: C Implementation of a Second-Order Section</title><para id="eip-58">You may want to implement the second-order section with the following function declaration:</para><code id="eip-409" display="block"><space count="10"/>long iirSoS(int *b, int *a, int *w_states, long input);</code><para id="eip-330">The above declaration is only a recommendation, and the exact number of arguments or even the datatypes used can be designed differently. The point though, is that this specification enables function re-use, unlike Lab 2 where different assembly functions were written for each filter.</para><para id="eip-615">In the suggested function declaration above, the first two arguments are pointers to the filter coefficients, the third argument is a pointer to the intermediate state buffer, and the final argument is the current input sample. The returned value is the output of the given second-order section.</para><note id="eip-852">Why would one want to declare the input as type <code>long</code>?</note><para id="eip-411">Here are some guidelines for implementing the second-order section in C:</para><list id="eip-339"><item>make sure you size accumulators appropriately, and type cast accordingly when accumulating values.</item>
+<item>for a naive initial implementation of the circular buffer, let the newest element, w[n] always have the lowest array index (i.e., w_states[0] = w[n]). Copy over other values as required; order matters!</item>
+<item>Handle overflow errors correctly. You may find it convenient to write a <emphasis>helper function</emphasis> that handles overflow correctly. The function declaration for this may look like:</item></list><code id="eip-621" display="block"><space count="25"/>int long2int( long );</code><para id="eip-164">See the Troubleshooting section below for tips on how to correctly handle overflow issues.</para><para id="eip-543">Finally, verify that the second-order section works correctly when using both sets of the second-order coefficients. To do this:</para><list id="eip-984" list-type="enumerated" number-style="arabic"><item>In Matlab, obtain your filter coefficients by properly grouping the pole/zero pairs. A given combination will result in a pair of scaling factors (G1,G2), where G is as defined in Figure 1. The rule of thumb is that you want to pick the pole/zero pairs such that the <emphasis effect="italics">worst-case</emphasis> gain, or min(G1,G2) is as close to 1 as possible.</item>
+<item>From the Prelab exercise, verify that the quantized coefficients are properly scaled and acceptable.</item>
+<item>In C, create buffers for each set of coefficients and intermediate states.</item>
+<item>Initialize the intermediate state buffers.</item>
+<item>Generate a test vector and verify your implementation. Refer to <link document="m45656">Step 9 of Lab 0</link>.</item></list></section><section id="eip-926"><title>Part 3: Cascade Implementation</title><para id="eip-266">Once your single second-order IIR section is working properly, you can proceed to implement the cascade of second-order sections. The modular design in Part 2 should make this fairly straightforward. Make sure to apply the gain factors to the two filter inputs. Type-casting and shifting may be required!</para></section>
+    <section id="import-auto-id1165206963517">
+      <title>Fixed-Point Processing: Troubleshooting</title><para id="import-auto-id7762369">This section contains additional information that will help you avoid common pitfalls associated with fixed-point processing.</para><para id="import-auto-id1165206812813"><emphasis effect="bold">Coefficients greater than 1:</emphasis>
+      </para><para id="import-auto-id1165206827945">You may have noticed that some of the coefficients you have computed for the second-order sections are larger than 1.0 in magnitude. For any stable second-order IIR section, the magnitude of the "0" and "2" coefficients (a<sub>0</sub> and a<sub>2</sub> for example) will always be less than or equal to 1.0 (make sure you understand why!). However, the magnitude of the "1" coefficient can be as large as 2.0. To overcome this problem, you will have to divide any coefficient larger than 1 by two prior to saving them for your DSP code. Then, in your implementation, <emphasis effect="bold">accumulate twice</emphasis> to compensate for using half the coefficient value.</para>
+      <para id="import-auto-id7853446"><emphasis effect="bold">Handling overflow:</emphasis>
+      </para><para id="eip-594">Overflow is really only a problem when one needs to <emphasis effect="italics">truncate</emphasis> the result of an accumulation (i.e., store a 16-bit number into a buffer).</para><para id="import-auto-id8795339">When accumulating numbers in twos-complement notation, a nice property is that the final value will be correct even if intermediate values overflow, <emphasis effect="italics">as long as the final accumulated value is in the range of representable numbers</emphasis> (i.e., in between -32768 and +32767).</para><para id="eip-45">If the final value is outside of this range, then one solution is to <emphasis effect="italics">saturate</emphasis> the value to +32767 or -32768. See <link document="m11921">Fixed-Point Quantization</link> for more information about the different errors incurred by fixed-point processing.</para></section>
+    <section id="import-auto-id1165206341601">
+      <title>Extra credit</title>
+      <para id="eip-208">In Part 2, we proposed an inefficient (yet simple) implementation of a circular buffer, where data elements are shifted one by one. This is clearly less efficient than circular addressing, where only a single pointer moves through the buffer and data elements remain fixed. <emphasis>For an extra credit point</emphasis>, write C code to get the compiler to implement circular addressing. You must be able to explain your C code and show the circular addressing in the assembler output. <emphasis>Hint:</emphasis> you will need an additional argument into <code>iir_SoS()</code> that keeps track of the current sample index.</para></section>
+
+    <section id="sec5">
+      <title>Grading</title>
+
+      <para id="p22">
+        Your grade on this lab will be split into three parts:
+      </para>
+
+      <list id="point_list" list-type="bulleted"><item>1 point: Prelab. Be prepared to show your Matlab code used to study coefficient quantization, and to compute poles and zeros.</item> 
+<item>3 points: Code. Your DSP code implementing the fourth-order IIR filter.</item>
+<item>4 points: Written quiz.  The quiz may cover differences between FIR and IIR filters, the prelab material, errors induced by fixed-point processing, and the MATLAB exercise.</item>
+<item> 1 point extra credit: Implementing hardware circular addressing in C; must verify using assembler output.</item></list></section>
+  </content>
+</document>

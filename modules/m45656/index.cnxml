@@ -1,0 +1,403 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML">
+  
+  <title>Lab 0: DSP Hardware Introduction</title>
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45656</md:content-id>
+  <md:title>Lab 0: DSP Hardware Introduction</md:title>
+  <md:abstract>This exercise introduces the DSP hardware and associated software used in the course. By the end of this module, you should be comfortable with the basics of testing a simple real-time DSP system with Code Composer Studio, the TI DSP c55x debugging environment. First you will connect the laboratory equipment and test a real-time DSP system with provided code to implement an eight-tap (eight coefficient) finite impulse response (FIR) filter. With
+a working system available, you will then begin to explore the debugging software used for downloading, modifying, and testing your code. Finally, you will create a filter in MATLAB and use test vectors to verify the DSP's output.</md:abstract>
+  <md:uuid>ce5677a7-0d73-4a74-9643-4b24cd3e83ec</md:uuid>
+</metadata>
+<featured-links>
+  <!-- WARNING! The 'featured-links' section is read only. Do not edit below.
+       Changes to the links section in the source will not be saved. -->
+    <link-group type="supplemental">
+      <link url="http://cnx.org/content/m45669/latest/" strength="1">Lab 1: Prelab</link>
+    </link-group>
+  <!-- WARNING! The 'featured-links' section is read only. Do not edit above.
+       Changes to the links section in the source will not be saved. -->
+</featured-links>
+<content>
+    <section id="sec1"><title>Introduction</title><para id="introp1">This exercise introduces the work-flow environment for developing real-time signal-processing systems, which consists of three major components:</para><list id="eip-7" list-type="enumerated" number-style="arabic"><item>hardware I/O tools (i.e., a function generator and oscilloscope), which are valuable for testing the functionality of a real-time DSP system,</item>
+<item>a software debugging environment, such as Code Composer Studio (CCS), which is used to write, download, execute, and debug DSP code,</item>
+<item>a high-level development environment, such as MATLAB, which is used to verify computational correctness, and explore and debug conceptual issues.</item></list><para id="eip-206">The DSP task in this exercise will be to implement a pre-written eight-tap (eight coefficient) <term>finite impulse response</term> (<term>FIR</term>) filter, verifying correctness using the hardware I/O tools, along with MATLAB test vectors.</para></section><section id="eip-219"><title>Lab Equipment</title><para id="p1">This exercise assumes you have access to a laboratory station equipped with a Texas Instruments TMS320C5510A-200 digital signal processor chip mounted on a Spectrum Digital TMS320VC5510 evaluation board. The DUAL3006, a daughtercard produced by Educational DSP, is mounted on the external peripheral interface of the board to enable four-input/four-output capability. The evaluation module should be connected to a PC running Windows and will be controlled using CCS v5.0. We will be using a 48kHz sample rate.
+      </para><note id="eip-264">If you are not using Code Composer Studio v5.0, the instructions on this page do not apply.  Please see the <link resource="http://cnx.org/content/m13811/latest/?collection=col10397">Digital Signal Processing Laboratory (ECE 420 55x)</link> Collection for instructions for version 4.0 and earlier.</note><para id="p2">
+        In addition to the DSP board and PC, each laboratory station
+        should also be equipped with a function generator to provide
+        test signals and an oscilloscope to display the processed
+        waveforms.
+      </para>
+      
+      <section id="sec1a">
+        <title>Step 1: Connect cables</title>
+        <para id="p3">Use the provided BNC cables to connect the output of the function generator to the input of the DSP evaluation board, and the DSP outputs to the oscilloscope, as shown in <link target-id="fig1"/>.
+
+</para><figure id="fig1"><title>Example Hardware Setup</title><media id="figid" alt=""><image src="../../media/setup.png" mime-type="image/png"/></media>
+        </figure><note id="eip-825">The actual channel ports may differ than what is shown in the illustration. Read the labels on the evaluation board!</note><para id="p4">With this configuration, you will have only one
+          signal going into the DSP board and two signals coming out.
+          The output on channel 1 is the filtered input signal, and
+          the output on channel 2 is the unfiltered input signal.
+          This allows you to view the raw input and filtered output
+          simultaneously on the oscilloscope.  Turn on the function
+          generator and the oscilloscope.
+        </para></section>
+      
+      <section id="sec1b">
+        <title>Step 2: Log in</title>
+        <para id="p5">Use your netID and password to log into the PC at your laboratory station. </para><para id="eip-734">When you log in, verify that the <code>U:</code> and <code>V:</code> networked drives are mapped to the computer. The <code>U:</code> drive is your personal work directory, and <code>V:</code> is a read-only course drive.</para><para id="p5b">Although you may want to work exclusively in one partner's network account, you should be sure that both partners have copies of the lab assignment code. </para></section>
+    </section><section id="sec2"><title>The Development Environment</title><para id="p8">The evaluation board is controlled by the PC through the JTAG interface in CCS.  This development environment allows the user to download, run, and debug code assembled on the PC.  Work through the steps below to familiarize yourself with the debugging environment and real-time system using the provided FIR filter code (Steps 3, 4 and 5), then verify the filter's frequency response with the subsequent MATLAB exercises (Steps 6 and 7).
+      </para><section id="sec2a"><title>Step 3: Assemble filter code</title><para id="eip-724"><title>Setup Code Composer</title>By default, a shortcut to CCS is available by going to <code>Start &gt; All Programs &gt; Texas Instruments &gt; Code Composer Studio v5</code>. When CCS starts for the first time, Workspace Launcher will start because it will need to set up your workspace.</para><para id="eip-667">Create or make sure you have the following directory: <code>U:\workspace\ECE420</code>.  In Workspace Launcher, hit <code>Browse...</code>, navigate to this folder, and make sure to check "Use this as the default and do not ask again".
+        <note id="eip-750">In the future, verify that you are in the correct workspace by going to <code>File &gt; Switch Workspace...</code></note>
+        <note id="caution">Make sure the workspace path does not start with "\\ad.uillinois.edu..."</note>
+</para><para id="eip-364"><title>Import Project</title>In CCS, go to <code>Project &gt; Import Existing CCS Eclipse Project</code>:</para><list id="eip-793" list-type="enumerated" number-style="arabic"><item>Browse to <code>V:\ece420\55x\ccs5\filter</code></item>
+<item>Check "Copy projects into workspace"</item></list><para id="eip-973"><title>Build Project</title>Once the project is copied into your workspace, we can proceed to build it:</para><list id="eip-170"><item>In Project Explorer, make sure that "filter" is highlighted.</item>
+<item>Select <code>Project &gt; Build Project</code>.</item></list><para id="eip-451">In a successful build, there will be zero errors and maybe a few warnings and remarks.  The output file will be placed in a Debug folder within the project's directory.  In this example, the executable binary code will be located at <code>.\Debug\filter.out</code>.
+</para></section>
+      
+      <section id="sec2b">
+	<title>Step 4: Verify filter execution</title>
+	
+	<list id="eip-852" list-type="enumerated" number-style="arabic"><title>Connect to the DSP</title><item>Select <code>View &gt; Target Configurations</code></item>
+<item>In the panel that comes up, expand <code>Projects &gt; filter</code></item>
+<item>Right-click on <code>dsk5510.ccxml</code> and select "Launch Selected Configuration"</item></list><para id="eip-123">Once CCS connects to the DSP, the debugger view will launch. Select <code>Run &gt; Connect Target</code></para><para id="p13"><title>Load and Run Program</title>Now, load your assembled filter file onto the DSP:</para><list id="eip-847"><item>Select <code>Run &gt; Load &gt; Load Program</code>.</item>
+<item>Select "Browse project" and choose the binary file <code>filter.out</code>. </item>
+<item>Execute the code by selecting <code>Run &gt; Resume</code>.</item> </list><para id="p14">The program you are running accepts input from input channel 1 and sends output waveforms to output channels 1 and 2 (the filtered signal and raw input, respectively).  
+</para><exercise id="eip-546"><problem id="eip-262">
+  <para id="eip-924">
+    Note that the "raw input" on output channel 2 may differ from the actual input on input channel 1. Why? 
+  </para>
+</problem>
+
+<solution id="eip-789">
+  <para id="eip-153">
+    Because of distortions introduced in converting the analog input to a digital signal and then back to an analog signal.
+  </para>
+</solution>
+</exercise><exercise id="eip-258"><problem id="eip-173">
+  <para id="eip-393">
+    What differences do you expect to see between the signals at input channel 1 and at output channel 2?
+  </para>
+</problem>
+
+<solution id="eip-43">
+  <para id="eip-712">
+    Hint: The A/D and D/A converters on the six-channel surround board operate at a sample rate of 48 kHz and have an <term>anti-aliasing filter</term> and an <term>anti-imaging filter</term>, respectively, that in the ideal case would eliminate frequency content above 24 kHz.  
+  </para>
+</solution>
+</exercise><exercise id="eip-725"><problem id="eip-73">
+  <para id="eip-266">
+    How would output channel 2 be different if the input had a DC offset?
+  </para>
+</problem>
+
+<solution id="eip-894">
+  <para id="eip-745">
+    the converters on the board are <term>AC coupled</term> and cannot pass DC signals.
+  </para>
+</solution>
+</exercise><para id="p15"><title>Configure Function Generator and Oscilloscope</title>Set the amplitude on the function generator to 1.0 V peak-to-peak and the pulse shape to sinusoidal. Adjust the function generator so that it expects a high impedance load. The sequence of button presses to accomplish this on the function generator in the lab is <code>Shift -&gt; Enter -&gt; Right -&gt; Right -&gt; Right -&gt; Down -&gt; Down -&gt; Right -&gt; Enter</code>.</para>
+	
+	<para id="eip-539">Make sure the oscilloscope is set to 1M impedance. This can be accomplished by pressing channel 1 or 2 and then selecting 1M Ohm from the Imped menu.</para><para id="eip-987">Observe the frequency response of the filter by sweeping the input signal through the relevant frequency range. What is the relevant frequency range for a DSP system with a sample rate of 48 kHz?</para><para id="p17"><title>Characterize Filter Response</title>Based on the frequency response you observe, characterize
+	  the filter in terms of its type (e.g., low-pass, high-pass,
+	  band-pass) and its -6 dB (half-amplitude) cutoff frequency
+	  (or frequencies).  It may help to set the trigger on channel
+	  2 of the oscilloscope since the signal on channel 1 may go
+	  to zero.
+	</para>
+      </section>
+
+      <section id="sec2c">
+	<title>Step 5: Re-assemble and re-run with new filter</title>
+        <para id="p18">Once you have determined the type of filter the DSP is
+          implementing, you are ready to repeat the process with a
+          different filter by including different coefficients during
+          the assembly process.
+          
+          There is a second set of filter coefficients already in your project folder.  In Windows Explorer, navigate to <code>U:\workspace\ece420\filter</code> and do the following:
+        </para><list id="eip-159"><item>Rename <code>coef.asm</code> to <code>coef1.asm</code></item>
+<item>Rename <code>coef2.asm</code> to <code>coef.asm</code></item></list><para id="p19">Repeat the assembly and testing process with the
+	  new filter by repeating steps required to build (<link target-id="sec2a">Step
+	  3</link>) and
+	  execute (<link target-id="sec2b">Step
+	  4</link>) the code. (You will need to rebuild filtercode.asm manually by right-clicking this file and selecting "Build Selected File". Afterwards, rebuild the project. There is a bug in CCSv5's Makefile generation that fails to make filtercode.asm depend on changes to coef.asm")</para><para id="p20a">
+	  Just as you did in <link target-id="sec2b">Step 4</link>,
+	  determine the type of filter you are running and the
+	  filter's -6 dB point by testing the system at various
+	  frequencies.
+	</para>
+      </section>
+      
+      <section id="sec2d">
+	<title>Step 6: Check filter response in MATLAB</title>
+	<para id="p20b">
+	  In this step, you will use MATLAB to verify the frequency
+	  response of your filter by copying the coefficients from the
+	  DSP to MATLAB and displaying the magnitude of the frequency
+	  response using the MATLAB command <code>freqz</code>.
+	</para>
+	<para id="p21"><title>View Coefficients in DSP Memory</title>The FIR filter coefficients included in the file <code>coef.asm</code> are stored in memory on the DSP.  To view the contents of the DSP memory, first suspend any running program by going to <code>Run &gt; Suspend</code> and then select <code>View &gt; Memory Browser</code>.
+	</para><para id="eip-442">In the panel that comes up, there is a text box for you to type in the name of the variable that you are interested in viewing.  This variable name is actually a mnemonic for a memory address.  In the case of our coefficients, the mnemonic <code>coef1</code> is used to point to the starting address of our coefficients.  The memory content can be displayed in many different formats.  In the drop-down box, choose <code>16-Bit Signed Int</code>.
+
+<note id="eip-id1171502540301" type="note">Make sure you understand where the <code>coef1</code> label comes from. [Hint:] Select <code>View &gt; C/C++ Projects</code> and double click on <code>filtercode.asm</code> to view the source code.</note></para><para id="p22">In this example, the filter coefficients are placed in
+	  memory in decreasing order; that is, the last coefficient,
+	  <m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">h</m:ci>
+	      <m:cn>7</m:cn>
+	    </m:apply>
+	  </m:math>, is at location <code>coef1</code> and the first
+	  coefficient,
+	  <m:math>
+	    <m:apply>
+	      <m:ci type="fn" class="discrete">h</m:ci>
+	      <m:cn>0</m:cn>
+	    </m:apply>
+	  </m:math>, is stored at <code>coef1+7</code>.
+	</para>
+	<para id="p23">
+	  Now that you can find the coefficients in memory, you are
+	  ready to use the MATLAB command <code>freqz</code> to view
+	  the filter's response.  You must create a vector in MATLAB
+	  with the filter coefficients to use the <code>freqz</code>
+	  command.  For example, if you want to view the response of
+	  the three-tap filter with coefficients -10, 20, -10 you can
+	  use the following commands in MATLAB:
+	  <list id="link2" list-type="bulleted" bullet-style="&gt;&gt;"><item><code>h = [-10, 20, -10];</code></item>
+	    <item><code>freqz(h)</code></item>
+	  </list>
+	</para>
+	<para id="p24">Note that you will have to enter eight values, the contents
+	  of memory locations <code>coef1</code> through
+	  <code>coef1+7</code>, into the coefficient vector,
+	  <code>h</code>. 
+<note id="eip-id1166174768374" type="tip">You must divide the coefficients by 32768.  Where does this scaling factor come from?</note></para>
+	<para id="p25">How does the MATLAB response compare with your experimental results?  What might account for any differences?
+	</para>
+      </section>
+      
+      <section id="sec2e">
+	<title>Step 7: Create new filter in MATLAB and verify</title>
+	<para id="p26">
+	  MATLAB scripts will be made available to you to aid in code
+	  development.  For example, one of these scripts allows you
+	  to save filter coefficients created in MATLAB in a form that
+	  can be included as part of the assembly process without
+	  having to type them in by hand (a very useful tool for long
+	  filters).  These scripts may already be installed on your
+	  computer; otherwise, download the files from the links as
+	  they are introduced.
+	</para>
+	<para id="p27">First, have MATLAB generate a "random" eight-tap filter by
+	  typing <code>h = gen_filt;</code> at a MATLAB prompt.  Then
+	  save this vector of filter coefficients by typing
+	  <code>save_coef('coef.asm',fliplr(h));</code> Make sure you
+	  save the file in your own directory.  (The scripts that
+	  perform these functions are available as gen_filt.m and save_coef.m and can be found at <code>V:/ece420/55x/m_files</code>)
+	</para><para id="p28">The <code>save_coef</code> MATLAB script will save the
+	  coefficients of the vector <code>h</code> into the named
+	  file, which in this case is <code>coef.asm</code>.  Note
+	  that the coefficient vector is "flipped" prior to being
+	  saved; this is to make the coefficients in
+	  <m:math>
+	    <m:ci>h</m:ci>
+	  </m:math> fill DSP memory-locations
+	  <code>coef1</code> through
+	  <code>coef1+7</code> in reverse order, as before.
+	</para>
+	<para id="p29">
+	  You may now re-assemble and re-run your new filter code as
+	  you did in <link target-id="sec2c">Step 5</link>.
+	</para>
+	<para id="p30">Notice when you load your new filter that the contents of
+	  memory locations <code>coef1</code> through
+	  <code>coef1+7</code> update accordingly.
+	</para>
+      </section>
+      <section id="sec2f">
+	<title>Step 8: Modify filter coefficients in memory</title>
+	<para id="p31">Not only can you view the contents of memory on the DSP
+	  using the debugger, you can change the contents at any
+	  memory location simply by double-clicking on the location
+	  and making the desired change in the pop-up window.
+<note id="eip-id1164642501698" type="note">The DSP must be in a halted state in order to overwrite the memory. </note></para>
+	<para id="p32a">Change the contents of memory locations <code>coef1</code>
+	  through <code>coef1+7</code> such that the coefficients
+	  implement a scale and delay filter with impulse response:
+	  <equation id="eqn1">
+	    <m:math>
+	      <m:apply>
+		<m:eq/>
+		<m:apply>
+		  <m:ci type="fn" class="discrete">h</m:ci>
+		  <m:ci>n</m:ci>
+		</m:apply>
+		<m:apply>
+		  <m:times/>
+		  <m:cn>8192</m:cn>
+		  <m:apply>
+		    <m:ci type="fn" class="discrete">δ</m:ci>
+		    <m:apply>
+		      <m:minus/>
+		      <m:ci>n</m:ci>
+		      <m:cn>4</m:cn>
+		    </m:apply>
+		  </m:apply>
+		</m:apply>
+	      </m:apply>
+	    </m:math>
+	  </equation> Note that the DSP interprets the integer value
+	  of 8192 as a fractional number by dividing the integer by
+	  32,768 (the largest integer possible in a 16-bit two's
+	  complement register).  The result is an output that is
+	  delayed by four samples and scaled by a factor of
+	  <m:math>
+	    <m:apply>
+	      <m:divide/>
+	      <m:cn>1</m:cn>
+	      <m:cn>4</m:cn>
+	    </m:apply>
+	  </m:math>.  More information on the DSP's interpretation of
+	  numbers appears in <link document="m10808">Two's Complement
+	  and Fractional Arithmetic for 16-bit Processors</link>.<note id="id1167589435761" type="note">A clear and complete understanding of how the
+	  DSP interprets numbers is absolutely necessary to
+	  effectively write programs for the DSP.  Save yourself time
+	  later by learning this material before attempting Lab 1!</note>
+	</para>
+	<para id="p32b">After you have made the changes to all eight coefficients,
+	  run your new filter and use the oscilloscope to measure the
+	  delay between the raw (input) and filtered (delayed)
+	  waveforms. 
+<note id="eip-id16766133" type="tip">Take advantage of the "Quick Measure" feature on the oscilloscope!</note>
+	</para>
+	<para id="p33">What happens to the output if you change either the scaling
+	  factor or the delay value?  How many seconds long is a
+	  single-sample delay? Six-sample delay?
+	</para>
+      </section>
+
+      <section id="sec2g">
+	<title>Step 9: Test-vector simulation</title>
+	<para id="p34">
+	  As a final exercise, you will find the output of the DSP for
+	  an input specified by a test vector.  Then you will compare
+	  that output with the output of a MATLAB simulation of the
+	  same filter processing the same input; if the DSP
+	  implementation is correct, the two outputs should be almost
+	  identical.  To do this, you will generate a waveform in
+	  MATLAB and save it as a test vector. You will then run your
+	  DSP filter using the test vector as input and import the
+	  results back into MATLAB for comparison with a MATLAB
+	  simulation of the filter.
+	</para>
+	<para id="p36">The first step in using test vectors is to generate an
+	  appropriate input signal.  One way to do this is to use the
+	  MATLAB function to generate a sinusoid that sweeps across a
+	  range of frequencies.  The MATLAB function
+	  <code>save_test_vector</code> (available as save_test_vector.m under m_files) can then
+	  save the sinusoidal sweep to a file you will later include
+	  in the DSP code.
+	</para><para id="p36b">Generate a sinusoidal sweep using <code>sweep.m</code> and save it to a DSP test-vector
+	  file using the following MATLAB commands: 
+	</para><list id="eip-593" list-type="bulleted" bullet-style="&gt;&gt;"><item><code>t=sweep(0.1*pi,0.9*pi,0.25,500); <space count="7"/> % Generate a frequency sweep</code></item>
+<item><code>save_test_vector('testvect.asm',t); <space count="4"/> % Save the test vector</code></item></list>
+	<para id="p37">
+	  Next, use the MATLAB <code>conv</code> command to generate a
+	  simulated response by filtering the sweep with the filter
+	  <m:math>
+	    <m:ci>h</m:ci>
+	  </m:math> you generated using <code>gen_filt</code>
+	  above. Note that this operation will yield a vector of
+	  length 507 (which is
+	  <m:math>
+	    <m:apply>
+	      <m:minus/>
+	      <m:apply>
+		<m:plus/>
+		<m:ci>n</m:ci>
+		<m:ci>m</m:ci>
+	      </m:apply>
+	      <m:cn>1</m:cn>
+	    </m:apply>
+	  </m:math>, where 
+	  <m:math>
+	    <m:ci>n</m:ci>
+	  </m:math> is the length of the filter and 
+	  <m:math>
+	    <m:ci>m</m:ci> 
+	  </m:math> is the length of the input).  You should keep only
+	  the first 500 elements of the resulting vector.
+	</para>
+	<list id="eip-281" list-type="bulleted" bullet-style="&gt;&gt;"><item><code>out=conv(h,t); <space count="12"/> % Filter t with FIR filter h</code></item>
+<item><code>out=out(1:500); <space count="11"/> % Keep first 500 elements of out</code></item></list><para id="p38">The <code>main.c</code> file needs to be told to take input from memory on the DSP. Fortunately, the changes have already been made in the files.   The test vector is stored
+	  in a block of memory on the DSP just like other variables.
+ The memory block that holds the test
+	  vector is large enough to hold a vector up to 4,000 elements
+	  long. The test vector stores data for all four channels of input
+	  and from four channels of output.
+	</para>
+	<para id="p40">To run your program with test vectors, you will need to
+	  modify <code>main.c</code> as well as <code>filtercode.asm</code>.  Both are simply text files and can be edited using the editor of
+	  your preference, including WordPad, Emacs, and VI. (The changes have already been made, but please visually verify the changes are there.) Within <code>main.c</code>, uncomment the <code>#define FILE_INPUT</code> line so that your program will rewrite input from the A/D with the test vector you specified and then save the output into a block of memory. </para>
+	
+	
+	
+	<para id="element-799">In <code>filtercode.asm</code>, uncomment the <code>.copy "testvect.asm"</code> line.  Make sure this Matlab generated file is in the same directory as <code>filtercode.asm</code>.
+<note id="eip-id14459311" type="note">In TI assembly, the semi-colon <code>;</code> signifies a comment.</note> </para>
+	<para id="para40d">These changes will copy in the test vector.  After modifying your code,
+	  assemble it, then load and run the file using Code Composer
+	  as before.  After a few seconds, halt the DSP (using the
+	  <code>Suspend</code> command under the <code>Run</code> menu). How many seconds do you think it should take?</para><para id="p41"><title>Saving DSP Memory to File</title>Next, we will save the test output file and load it back into MATLAB.  We are interested in the first 500 output samples, starting at address <code>tv_outbuf</code> in <code>Data</code> memory.  There are four output channels and the memory is interleaved in time.  Therefore, we will have to collect 2000 (4 channels time 500 samples) memory elements.</para>
+	<list id="eip-91"><item>Select <code>View &gt; Memory Browser</code></item>
+<item>Click on the "Save" icon, a green square with an angled arrow (top left in the Memory panel)</item>
+<item>Hit Browse and make sure you are in your U: workspace</item>
+<item>Name the file <code>output.dat</code> and save filetype as TI data format</item>
+<item>On the next screen, use the following options:
+  <list id="eip-id1169613502539"><item>format: <code>16-Bit Hex - TI Style</code></item>
+   <item>start address: <code>tv_outbuf</code></item>
+   <item>memory page: <code>data</code></item>
+   <item>length: <code>2000</code></item>
+  </list></item></list><para id="p42">Last, use the <code>read_vector</code> (available as <code>read_vector.m</code>) function to read
+	  the saved result into MATLAB. Do this using the following
+	  MATLAB command:
+	</para><list id="eip-269" list-type="bulleted" bullet-style="&gt;&gt;"><item><code>[ch1,ch2,ch3,ch4] = read_vector('output.dat');</code></item></list>
+	<para id="p43">
+	  Now, the MATLAB vector <code>ch1</code> corresponds to the
+	  filtered version of the test signal you generated. The
+	  MATLAB vector <code>ch2</code> should be nearly identical to
+	  the test vector you generated, as it was passed from the DSP
+	  system's input to its output unchanged.  <note id="id1167609302423" type="Note"><label>Note</label>Because of quantization error introduced in
+	  saving the test vector for the 16-bit memory of the DSP, the
+	  vector <code>ch2</code> will not be identical to the MATLAB
+	  generated test vector.  </note>
+	</para>
+	<para id="p44">
+	  After loading the output of the filter into MATLAB, compare
+	  the expected output (calculated as <code>out</code> above)
+	  and the output of the filter (in <code>ch1</code> from
+	  above). This can be done graphically by simply plotting the
+	  two curves on the same axes; for example:
+	</para>
+	
+	<list id="eip-800" list-type="bulleted" bullet-style="&gt;&gt;"><item><code>plot(out,'r'); <space count="4"/> % Plot the expected curve in red</code></item>
+<item><code>hold on <space count="11"/> % Plot the next plot on top of this one</code></item>
+<item><code>plot(ch1,'g'); <space count="4"/> % Plot the expected curve in green</code></item>
+<item><code>hold off</code></item> 
+	  </list><para id="p47">
+	  You should also ensure that the difference between the two
+	  outputs is near zero. This can be done by plotting the
+	  difference between the two vectors:
+	</para>
+	
+	<list id="eip-598" list-type="bulleted" bullet-style="&gt;&gt;"><item><code>plot(out(1:length(ch1))-ch1); <space count="4"/> % Plot error signal</code></item> </list><para id="p48">
+	  You will observe that the two sequences are not exactly the
+	  same; this is due to the fact that the DSP computes its
+	  response to 16 bits precision, while MATLAB uses 64-bit
+	  floating point numbers for its arithmetic.  Blocks of output samples may also be missing from the test vector output due to a bug in the test vector core.  Nonetheless, the test vector environment allows one to run repeatable experiments using the same known test input for debugging.
+	</para>
+      </section><section id="eip-696"><title>Step 10: Closing Down</title><para id="eip-8">Before exiting Code Composer, make sure to disconnect properly from the DSP:
+<list id="eip-id1165234782490"><item> Halt any program running on the DSP (<code>Run &gt; Suspend</code>)</item>
+<item> Disconnect from the DSP (<code>Run &gt; Connect</code> will toggle between connecting and disconnecting)</item>
+</list></para></section>
+    </section>
+  </content>
+</document>

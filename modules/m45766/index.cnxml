@@ -1,0 +1,182 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML">
+  <title>Lab 4 Prelab 4</title>
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45766</md:content-id>
+  <md:title>Lab 4 Prelab 4</md:title>
+  <md:abstract>You will investigate the effects of windowing and zero-padding on the Discrete Fourier Transform of a signal, as well as the effects of data-set quantities and weighting windows used in Power Spectral Density estimation.</md:abstract>
+  <md:uuid>366108a3-7fec-4c0e-a5fc-654b117101c8</md:uuid>
+</metadata>
+
+<content>
+    <section id="sec1">
+      <title>MATLAB Exercise, Part 1</title>
+      <para id="s1p1">
+	Since the DFT is a sampled version of the spectrum of a
+	digital signal, it has certain sampling effects.  To explore
+	these sampling effects more thoroughly, we consider the effect
+	of multiplying the time signal by different window functions
+	and the effect of using zero-padding to increase the length
+	(and thus the number of sample points) of the DFT.  Using the
+	following MATLAB script as an example, plot the
+	squared-magnitude response of the following test cases over
+	the digital frequencies
+	<m:math>
+	  <m:apply>
+	    <m:eq/>
+	    <m:ci>
+	      <m:msub>
+		<m:mi>ω</m:mi>
+		<m:mi>c</m:mi>
+	      </m:msub>
+	    </m:ci>
+	    <m:interval>
+	      <m:apply>
+		<m:divide/>
+		<m:pi/>
+		<m:cn>8</m:cn>
+	      </m:apply>
+	      <m:apply>
+		<m:divide/>
+		<m:apply>
+		  <m:times/>
+		  <m:cn>3</m:cn>
+		  <m:pi/>
+		</m:apply>
+		<m:cn>8</m:cn>
+	      </m:apply>
+	    </m:interval>
+	  </m:apply>
+	</m:math>.  
+      </para>
+      <list id="list1" list-type="enumerated">
+	<item>rectangular window with no zero-padding</item>
+	<item>hamming window with no zero-padding</item>
+	<item>rectangular window with zero-padding by factor of four
+	(<foreign>i.e.</foreign>, 1024-point FFT)</item>
+	<item>hamming window window with zero-padding by factor of
+	  four</item>
+      </list>
+      <para id="s1p2">
+	Window sequences can be generated in MATLAB by using the
+	<code>boxcar</code> and <code>hamming</code> functions.
+      </para>
+      <code id="id1171833767178" display="block">
+	
+	1  N = 256;                % length of test signals
+	2  num_freqs = 100;        % number of frequencies to test
+	3
+	4  % Generate vector of frequencies to test
+	5
+	6  omega = pi/8 + [0:num_freqs-1]'/num_freqs*pi/4;
+	7
+	8  S = zeros(N,num_freqs);                 % matrix to hold FFT results
+	9
+	10
+	11  for i=1:length(omega)                   % loop through freq. vector
+	12     s = sin(omega(i)*[0:N-1]');          % generate test sine wave
+	13     win = boxcar(N);                     % use rectangular window
+	14     s = s.*win;                          % multiply input by window
+	15     S(:,i) = (abs(fft(s))).^2;           % generate magnitude of FFT
+	16                                          % and store as a column of S
+	17  end
+	18
+	19  clf;
+	20  plot(S);                                % plot all spectra on same graph
+	21
+	
+      </code>
+      <para id="s1p3">
+	Make sure you understand what every line in the script does.
+	What signals are plotted?
+      </para>
+      <para id="s1p4">
+	You should be able to describe the tradeoff between mainlobe
+	width and sidelobe behavior for the various window functions.
+	Does zero-padding increase frequency resolution?  Are we
+	getting something for free?  What is the relationship between
+	the DFT,
+	<m:math>
+	  <m:apply>
+	    <m:ci type="fn" class="discrete">X</m:ci>
+	    <m:ci>k</m:ci>
+	  </m:apply>
+	</m:math>, and the DTFT,
+	<m:math>
+	  <m:apply>
+	    <m:ci type="fn">X</m:ci>
+	      <m:ci>ω</m:ci>
+	  </m:apply>
+	</m:math>, of a sequence
+	<m:math>
+	  <m:apply>
+	    <m:ci type="fn" class="discrete">x</m:ci>
+	    <m:ci>n</m:ci>
+	  </m:apply>
+	</m:math>?
+      </para>
+    </section><section id="eip-299"><title>MATLAB exercise, Part 2</title><para id="eip-985">In this section, you will resolve the two closely spaced sine waves using a Fourier transform method. Consider the signal: </para><equation id="eip-916"><m:math overflow="scroll" mode="display">
+        <m:mrow>
+          <m:mi>x</m:mi>
+          <m:mrow>
+            <m:mo>(</m:mo>
+            <m:mi>n</m:mi>
+            <m:mo>)</m:mo>
+          </m:mrow>
+          <m:mo>=</m:mo>
+          <m:mo form="prefix">sin</m:mo>
+          <m:mrow>
+            <m:mo>(</m:mo>
+            <m:mn>2</m:mn>
+            <m:mi>π</m:mi>
+            <m:msub>
+              <m:mi>f</m:mi>
+              <m:mn>1</m:mn>
+            </m:msub>
+            <m:mi>n</m:mi>
+            <m:mo>)</m:mo>
+          </m:mrow>
+          <m:mo>+</m:mo>
+          <m:mo form="prefix">sin</m:mo>
+          <m:mrow>
+            <m:mo>(</m:mo>
+            <m:mn>2</m:mn>
+            <m:mi>π</m:mi>
+            <m:msub>
+              <m:mi>f</m:mi>
+              <m:mn>2</m:mn>
+            </m:msub>
+            <m:mi>n</m:mi>
+            <m:mo>)</m:mo>
+          </m:mrow>
+        </m:mrow>
+      </m:math>
+    
+</equation><para id="eip-443">consisting of two sine waves of frequency 2000 Hz and 2100 Hz with sampling frequency of 8000 Hz. Here, n is the discrete time index.</para><para id="eip-950">Generate a block of 256 samples of x(n) and use the Fast Fourier Transform (fft) command to determine the two frequency components.</para><exercise id="eip-939"><problem id="eip-907">
+  <para id="eip-513">
+What is the closest frequency to 2000 Hz that you can resolve using the Fourier transform method? Which of the following method applied to x(n) results in the best resolving capabilities? Why?
+  </para>
+<list id="eip-874">
+<item>rectangular window with no zero-padding</item>
+<item>hamming window with no zero-padding</item>
+<item>rectangular window with zero-padding by factor of four (i.e., 1024-point FFT)</item>
+<item>hamming window window with zero-padding by factor of four.</item>
+</list>
+</problem></exercise></section><section id="eip-967"><title>MATLAB excercise Part 3</title><example id="eip-978"><para id="eip-325">The following Matlab code can be used to generate a pure tone:
+</para><code id="eip-212" display="block">fs = 8000; %sampling rate
+duration = 1; % sec
+t = linspace(0, duration, duration * fs); % time axis
+freq = 600; % Hz
+x = sin(2*pi*freq*t);
+</code><para id="eip-245">To listen to it, you can use:</para><code id="eip-936" display="block">soundsc(x, fs)</code><para id="eip-871">This will be useful for testing purposes in Lab 4.</para></example><para id="eip-366"><emphasis>Short-time spectral analysis</emphasis> is an important technique that is used to visualize the time evolution of the frequency content of non-stationary signals, such as speech. The fundamental assumption is that the signal is modeled as being <emphasis effect="italics">quasi</emphasis>-stationary over short time periods; in many speech applications, this period is on the order of 20-30 milliseconds.</para><para id="eip-952">The short-time Fourier transform (STFT) is defined to be:
+<equation id="eip-637">X(τ,f) = FT{x(t)w(t-τ)}</equation>
+where f is frequency, FT represents the Fourier transform operation, and w(t-τ) is a window with finite-time support centered at time τ (i.e., it is non-zero for only a short amount of time near τ). 
+</para><para id="eip-827">In the case of digital time and frequency, the rate at which τ is evaluated, along with the block size used to compute the FFT determines the amount of data overlap that occurs in evaluating the STFT over time.
+</para><para id="eip-996">The <emphasis>spectrogram</emphasis> is just the magnitude-squared of the STFT, and can be computed in MATLAB:
+</para><code id="eip-785" display="block">spectrogram(x, nwin, noverlap);
+</code><para id="eip-685">which computes the STFT using a Hamming window of length nwin, every <code>nwin-noverlap</code> samples. The question of how much to overlap can be understood by asking how many time/frequency samples are required to <emphasis effect="italics">fully</emphasis> represent the continuous time-frequency STFT; for the interested reader, see the section titled "Analysis of Short Term Spectra" in <cite window="new" url="http://hear.beckman.illinois.edu/public/Allen77-STFT.pdf">[Allen77]</cite>.</para><exercise id="eip-830"><problem id="eip-910">
+  <para id="eip-959">Plot the spectrogram of the first two signals you generate in part 2 with no overlap and 50% overlap. How are the spectrograms different between the two methods?</para>
+<para id="eip-923">For students in the Wednesday and Thursday sections: repeat this for the the following frequency-sweep signal:
+<code id="eip-id1165754945043" display="block">s = chirp(0:1/8000:0.5,1000,0.5,5000);</code></para>
+<para id="finalq">Type <code>doc chirp</code> to understand the input arguments to the chirp function. What is going on at 0.4 seconds into the signal?</para></problem>
+</exercise></section></content>
+</document>

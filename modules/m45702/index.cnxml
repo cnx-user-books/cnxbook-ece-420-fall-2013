@@ -1,0 +1,230 @@
+<document xmlns="http://cnx.rice.edu/cnxml">
+  
+  <title>Lab 1: Lab</title>
+  <metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45702</md:content-id>
+  <md:title>Lab 1: Lab</md:title>
+  <md:abstract>You will implement band-pass finite impulse-response (FIR) filters with time-domain processing.</md:abstract>
+  <md:uuid>85ac4e29-cc68-4493-9f74-78e8a1f700d2</md:uuid>
+</metadata>
+
+<content>
+    <section id="sec1">
+      <title>Introduction</title>
+      <para id="para1a">In this exercise, you will program in the DSP's assembly
+	language and C to create FIR filters.  Begin by studying the
+	assembly code for the basic FIR filter <link resource="filtercode.asm">filtercode.asm</link>. For help with circular addressing, view <link document="m14262">Addressing Modes for TI TMS320C55x</link>.
+      </para><code id="fig1" display="block" class="listing"><title>filtercode.asm</title>.ARMS_off						;enable assembler for ARMS=0
+	.CPL_on					;enable assembler for CPL=1
+	.mmregs					;enable mem mapped register names
+
+	.global _filter
+	.global _inPtr
+	.global _outPtr
+
+	.copy "macro.asm"				; Copy in macro declaration
+
+	.sect ".data"
+
+FIR_len1	.set 8					; This is a 8-tap filter
+
+	.align 32					; Align to a multiple of 16
+coef1							; assign label "coef1"
+	.copy "coef.asm"				; Copy in coefficients
+
+
+	.align 32			
+inputBuffer	.space 16*FIR_len1			; Allocate 8 words of storage for filter state
+
+new_sample_index					; Allocate storage to save index in inputBuffer
+	.word	0
+
+	.copy "testvect.asm"
+
+	.sect ".text2"
+
+_filter
+
+	ENTER_ASM					; Call macro. Prepares registers for assembly
+	
+	MOV		#0, AC0			; Clears AC0 and XAR3
+	MOV		AC0, XAR3			; XAR3 needs to be cleared due to a bug
+
+	MOV		dbl (*(#_inPtr)), XAR6	; XAR6 contains address to input
+	MOV		dbl (*(#_outPtr)), XAR7	; AR7 contains address to output
+
+	BSET		AR2LC				; sets circular addressing for AR2
+
+	MOV		#inputBuffer, AR2		; State pointer is in AR2
+	MOV		mmap(AR2), BSA23		; BSA23 contains address of inputBuffer
+	MOV		#new_sample_index, AR4	; State index pointer is in AR4
+	MOV		*AR4, AR2			; AR2 contains the index of oldest state
+	
+	MOV		#coef1, AR1			; initialize coefficient pointer
+	MOV		#FIR_len1, BK03		; initialize circular buffer length for register 0-3
+
+	MOV		*AR6+ &lt;&lt; #16, AC0		; Receive ch1 into AC0 accumulator
+	MOV		AC0, AC1			; Transfer AC0 into AC1 for safekeeping
+	
+	MOV		HI(AC0), *AR2+		; store current input into state buffer
+	MOV		#0, AC0			; Clear AC0
+	RPT		#FIR_len1-1			; Repeat next instruction FIR_len1 times
+	MACM		*AR1+,*AR2+,AC0,AC0		; multiply coef. by state &amp; accumulate
+	round		AC0				; Round off value in 'AC0' to 16 bits  
+
+	MOV		HI(AC0), *AR7+		; Store filter output (from AC0) into ch1
+	MOV		HI(AC1), *AR7+		; Store saved input (from AC1) into ch2
+	MOV		HI(AC0), *AR7+
+	MOV		HI(AC1), *AR7+
+
+	MOV		AR2, *AR4			; Save the index of the oldest state back into new_sample_index
+	LEAVE_ASM					; Call macro to restore registers
+
+	RET
+
+
+
+
+	</code>
+      <para id="p1"><code>filtercode.asm</code> applies an FIR filter to the signal
+	from input channel 1 and sends the resulting output to output
+	channel 1.  It also sends the original signal to output
+	channel 2.
+      </para>
+      <para id="p2">First, use the MATLAB command <code>firpm</code> to generate a 20-tap FIR filter. Type <code>doc firpm</code> for information on how to use this command. The filter should pass signals from 4 kHz to 8 kHz. Allow a 1 kHz transition band on each edge of the filter passband. Remember to convert these band edges to digital frequencies based on the 48 kHz sample rate of the system.</para><para id="eip-537">Use the <code>save_coef</code> command to save the filter. (Make sure you reverse the vector of filter coefficients before you save them.)  Also save your filter as a MATLAB matrix, since you will need them later to generate test vectors. This can be done using the MATLAB <code>save</code> command. Once this is done, use the <code>freqz</code> command to plot the frequency response of the filter.</para></section>
+    <section id="sec2">
+      <title>Part 1: Single-Channel FIR Filter</title>
+      <para id="p3">In this section, you will implement the 20-tap FIR filter. Edit <code>filtercode.asm</code> to use the coefficients for this filter by making several changes.
+      </para><para id="p4">First, the length of the FIR filter for this exercise is 20,
+	not 8.  Therefore, you need to change <code>FIR_len1</code> to
+	20. <code>FIR_len1</code> is set using the <code>.set</code>
+	directive, which assigns a number to a symbolic name. You will
+	need to change this to <code>FIR_len1 .set 20</code>.
+      </para>
+      <para id="p5">
+	Second, you will need to ensure that the <code>.copy</code>
+	directive brings in the correct coefficients. Change the
+	filename to point to the file that contains the coefficients
+	for your first filter.
+      </para>
+      <para id="p6">Third, you will need to modify the <code>.align</code> and
+	<code>.space</code> directives appropriately. The TI
+	TMS320C55x DSP requires that circular buffers, which are used
+	for the FIR filter coefficient and state buffers, be aligned
+	so that they begin at an address that is a multiple of a power
+	of two greater than the length of the buffer. Since you are
+	using a 20-tap filter (which uses 20-element state and
+	coefficient buffers), the next greater power of two is 32.
+	Therefore, you will need to align both the state and
+	coefficient buffers to an address that is a multiple of 32.
+	(16-element buffers would also require alignment to a multiple
+	of 32.)  This is done with the <code>.align</code> command. In
+	addition, memory must be reserved for the state buffer. This
+	is done using the <code>.space</code> directive, which takes
+	as its input the number of <emphasis>bits</emphasis> of space
+	to allocate. Therefore, to allocate 20 words of storage, use
+	the directive <code>.space 16*20</code> as shown below:
+      </para>
+      <code id="id9705792" display="block">1         .align 32             % Align to a multiple of 32
+	2  coef1   .copy  "coef1.asm"  % Copy FIR filter coefficients
+	3
+	4         .align 32             % Align to a multiple of 32
+	5  inputBuffer  .space 16*20          % Allocate 20 words of data space
+      </code><para id="p7">Assemble your code, load the output file, and run.  Ensure that it
+	is has the correct frequency response. After you have verified
+	that this code works properly, proceed to the next step.
+      </para>
+    </section>
+    <section id="sec3"><title>Part 2: Assembly Function Calls From C</title><para id="p9">So far you have been working exclusively in your <code>filtercode.asm</code> file, where the
+FIR filtering is taking place. In this part, you will be exposed to some of the C code that is required to setup the hardware peripherals. Your goal will be to write C code to change how the filtered output and raw input are sent to the output channels.
+
+
+      </para><para id="eip-547">You may have noticed that your assembly code seems to automatically run every time a new input sample is ready to be processed. How does the system know to run the assembly routine when new samples are waiting? The answer lies in an
+<emphasis>interrupt</emphasis>, a signal sent by the hardware alerting the processor that new samples are ready
+to be processed.</para><para id="p10">Open <code>main.c</code>, and find the function named <code>HWI_RINT0</code>.
+This is the function that is called each time the DSP receives a hardware interrupt, 
+signaling the presence of new input samples. You can see that <code>input[0]</code> and
+<code>input[1]</code> receive the samples from the four input channels, and then 
+<code>filter()</code> is called, beginning your assembly routine in <code>filtercode.asm</code>.
+After the assembly function returns back into the C code, <code>output[0]</code> and <code>output[1]</code> 
+hold your four output samples.
+<note id="eip-128">The <code>output[0]</code> variable is a 32-bit integer. Channel 1 and 2 outputs are expected in the top 16 bits and bottom 16 bits, respectively. Likewise, channels 3 and 4 are expected in the top and bottom 16 bits of <code>output[1]</code>.</note>
+</para><para id="eip-861">Now that you understand how your assembly routine is called from C, modify it to return the value of the filter output, instead of writing it to outBuffer directly in assembly. Modify <code>main.c</code> with the following:
+</para><list id="eip-675" list-type="enumerated" number-style="arabic"><item>Replace the function declaration <code>extern void filter(void)</code> with <code>extern int filter(void)</code>.</item>
+<item>Create an output variable called <code>outval</code> to store the value returned from <code>filter()</code>.</item>
+<item>Store <code>outval</code> into output channels 1 and 3, and your unfiltered input sample from channel 1 into output channels
+2 and 4.</item>
+</list><note id="eip-753" type="tip">Use typecasting, bitshifting, and bitwise operations to pack the <code>output</code> variables accordingly.</note><para id="eip-383">Now that the C code has been changed, you must modify the assembly code to actually return the value. To do this, there is an established convention for how to pass and return values between C and assembly. The rules for this convention are given in <emphasis>Section 6.4</emphasis> of the <link url="http://www.ti.com/lit/ug/spru281g/spru281g.pdf">TMS320C55x Optimizing C/C++ 
+Compiler User's Guide</link>.<note id="eip-176" type="tip">Please read and understand this section in the manual before proceeding!</note></para><para id="eip-690">Currently, the filter output and raw input are copied to the <code>output</code> buffers:</para><para id="eip-455"><code>  MOV HI(AC0), *AR7+ </code> <newline/>
+<code>	MOV HI(AC1), *AR7+ </code> <newline/>
+<code>	MOV HI(AC0), *AR7+ </code><newline/>
+<code>	MOV HI(AC1), *AR7+ </code></para><para id="eip-904">Replace these commands with a single command to return only the filter output. <emphasis>Hint:</emphasis> you will need register <code>T0</code>.</para><para id="eip-803">Now after compiling, loading, and running your code, your filter should behave just as in Part 1.
+In this second part of the lab, you have learned how to make a call to an assembly
+routine much more modular as you should know how to pass and return values between C and assembly. This will become valuable in later
+labs, when you may want to cascade multiple assembly subroutines together.</para>
+      
+    </section><section id="sec5">
+      <title>Part 3: Alternative Single-Channel FIR Implementation</title>
+      <para id="p12">An alternative method of implementing symmetric FIR filters uses the <term><code>firsadd</code></term> instruction.  First, make a copy of <code>filtercode.asm</code>, as you will have to demo this part separately from the previous two. Modify your code to implement the filter with a 4 kHz to 8 kHz passband using the <code>firsadd</code>.
+      </para><para id="p13">Two differences in implementation between your code from <link target-id="sec2">Part 1</link> and the code you will write for
+	this part are that <code>firsadd</code> requires the states
+	to be broken up into two separate circular buffers.  Refer to
+	the <code>firsadd</code> instruction on <cite><cite-title>page 5-152</cite-title></cite> in
+	the <cite url="http://focus.ti.com/lit/ug/spru374g/spru374g.pdf"><cite-title>Mnemonic
+	Instruction Set</cite-title></cite> manual.
+      </para><code id="id5275724" display="block"><newline/>
+	1       mov     *AR1, *AR2-                     ; write x(-N/2) over x(-N)
+	2       mov	HI(AC0), *AR1		        ; write x(0) over x(-N/2)
+	3       add     *AR1-, *AR2-, AC0               ; add x(0) and x(-(N-1))
+	4					        ;   (prepare for first multiply)
+	5       rpt     #(FIR_len1/2-1)
+	6       firsadd *AR1-, *AR2-, *CDP+, AC0, AC1
+	7       round   AC1
+	8       amar	????????????????		; Fill in these two instructions
+	9       amar	?????				; They modify AR1 and AR2
+	10                   
+	11                                              ; note that the result is now in the
+	12					        ;  AC1 accumulator
+      </code><para id="p15">
+	Because states and coefficients are now treated differently
+	than in your previous FIR implementation, you will need to
+	modify the pointer initializations to
+      </para>
+      <code id="id3896682" display="block">
+        1       bset	AR1LC		              ; sets circular addressing for AR1
+	2       bset	AR2LC		              ; sets circular addressing for AR2
+	3       
+        4 
+	5       mov	#firState1, AR1
+	6       mov	#firState1Index, AR4
+	7       mov     mmap(AR1), BSA01
+	8       mov    *AR4, AR1		      ; get pointer to oldest delayBuf in AR1
+	9
+	10      mov     #firState2, AR2
+	11      mov     #firState2Index, AR5
+	12      mov	mmap(AR2), BSA23
+	13      mov	*AR5, AR2
+        14
+	15
+	16      mov     #(FIR_len1/2), BKC
+	17      mov     #(FIR_len1/2), BK03	      ; initialize circular buffer length for register 0-3
+	18      mov     #coef1, CDP		      ; CDP contains address of coefficients
+        19      mov     *AR6 &lt;&lt; #16, AC0              ; copy input into AC0
+	
+      </code>
+      <para id="element-493">There are also a couple other changes that need to be made before the code will compile successfully. Read the comments carefully and understand how the <code>firsadd</code> instruction works to make the necessary changes. Hint: Make sure accumulator usage (AC0, AC1, AC2) and what is sent to output is correct.</para><para id="p16">Using the techniques introduced in <link document="m45656">Lab 0: DSP Hardware Introduction</link>, generate an appropriate test vector and find the expected output in MATLAB. In MATLAB, plot the expected and actual outputs of the filter, and the difference between the expected and actual outputs. Why is the output from the DSP system not exactly the same as the output from MATLAB?      </para><para id="eip-317">Next, compare the output of this code against the output of the same filter implemented using the <code>mac</code> instruction. Are the results the same? Why or why not?  Ensure that the filtered output is sent to output channel 1, and that the unmodified output is still sent to output channel 2.
+<note id="id5587198" type="warning">You will lose credit if the unmodified output is not present or if the channels are reversed!</note>
+</para></section>
+    
+    <section id="sec6">
+      <title>Quiz Information</title>
+      <para id="p17">The points for Lab 1 are broken down as follows:
+      </para><list id="point_list" list-type="bulleted"><item> 1 point: Prelab (must be ready to show the TA the week before the quiz)</item> 
+<item> 3 points: Working code from Parts 2 and 3: you must demonstrate that your code works using input from the function generator and that it works using input from appropriate test vectors.  Have an <code>.asm</code> file <emphasis>ready</emphasis> to demonstrate each.</item>
+<item> 4 points: Quiz score.</item></list><para id="p18">The quiz may cover signal processing material relating to fixed point processing fundamentals, convolution, and the differences between ideal FIR filters and realizable FIR filters.  You may also be asked questions about digital sampling theory, including, but not limited to, the Nyquist sampling theorem and the relationship between the analog frequency spectrum and the digital frequency spectrum of a continuous-time signal that has been sampled.</para><para id="p19">The quiz <emphasis>will</emphasis> cover the code that you have written during the lab.  You are expected to understand, in detail, all of the code in the files you have worked on, even if your partner wrote it.  The quiz may cover various key lines of code, 2's complement fractional arithmetic, circular buffers, alignment, typecasting and bit manipulation in C, function calling conventions between C and assembly, and the mechanics of either of the two FIR filter implementations.</para><para id="p20">Use the TI documentation, specifically the <cite url="http://focus.ti.com/lit/ug/spru374g/spru374g.pdf"><cite-title>Mnemonic
+	Instruction Set</cite-title></cite> manual. Also, feel free to ask the TAs to
+	help explain the code that you have been given.
+      </para>
+    </section>
+  </content>
+</document>

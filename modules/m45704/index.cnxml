@@ -1,0 +1,20 @@
+<document xmlns="http://cnx.rice.edu/cnxml" xmlns:m="http://www.w3.org/1998/Math/MathML">
+  <title>Lab 2 : Prelab part II (upsampling and downsampling)</title>
+<metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45704</md:content-id>
+  <md:title>Lab 2 : Prelab part II (upsampling and downsampling)</md:title>
+  <md:abstract/>
+  <md:uuid>52ce6dbe-0899-4964-8c5f-3bcaaf6da602</md:uuid>
+</metadata>
+
+<content>
+    <para id="id306788">Upsampling and downsampling in Matlab can be implemented by the functions <emphasis effect="bold">downsample</emphasis> and <emphasis effect="bold">upsample</emphasis>.
+Design a lowpass filter of length 100 and cut off frequency of <m:math overflow="scroll"><m:mfrac><m:mi>π</m:mi><m:mn>3</m:mn></m:mfrac></m:math> (you can use the Matlab function <emphasis effect="bold">fir1</emphasis>).
+To visualize the effect of downsampling and upsampling , you might want to plot different magnitude responses in one figure.
+The Matlab syntax:
+<emphasis effect="bold">[h,w] = freqz(hfilt)</emphasis>
+returns the frequency response of the filter hfilt without logarithmic scaling (see Matlab help documentation for more information).</para>
+    <para id="id306832">Plot the frequency response of your newly designed filter together with its downsampled and upsampled versions by 2 in one figure.
+Redo the problem with the upsampling and downsampling factors equal to 3. Do your results agree with the theory?</para>
+  </content>
+</document>

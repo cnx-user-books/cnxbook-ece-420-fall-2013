@@ -1,0 +1,132 @@
+<document xmlns="http://cnx.rice.edu/cnxml">
+
+<title>Lab 4: Lab</title>
+<metadata xmlns:md="http://cnx.rice.edu/mdml">
+  <md:content-id>m45767</md:content-id>
+  <md:title>Lab 4: Lab</md:title>
+  <md:abstract>Implement a spectrogram application in the Native Android environment. Signal processing includes windowing, zero-padding, overlapping, FFT, and working with complex numbers.</md:abstract>
+  <md:uuid>484a9fb7-6264-4eea-90a3-d0f27645aa1e</md:uuid>
+</metadata>
+
+<content>
+  <section id="eip-295"><title>Lab Overview</title><para id="eip-757">In this lab, you will create an Android application that plots the spectrogram of streaming audio, and deploy it on the <link url="http://www.google.com/nexus/7/" window="new">Google Nexus 7</link> tablet.
+</para><para id="eip-758">Similar to the previous labs, you will be provided with an existing project with all of the required peripherals already set up. Unlike the previous labs where data was processed sample-by-sample, this lab requires block-based processing. </para><exercise id="eip-551"><problem id="eip-853">
+  <para id="eip-711">What is the <emphasis effect="italics">minimum</emphasis> latency for processing a block of length 256, with an audio sampling rate of 8 kHz?
+  </para></problem>
+</exercise><para id="eip-950"><link target-id="blkdiagram"/> shows a block diagram of the system you will be implementing. The project is already configured to stream audio and display the processed output to the screen. 
+
+<figure id="blkdiagram"><title>System-level Block Diagram</title><media id="blk" alt="Audio capture -&gt; Audio buffer -&gt; Preprocessing -&gt; FFT -&gt; Energy calculation -&gt; Display">
+    <image mime-type="image/jpeg" src="../../media/lab4_block.jpg" width="512"/>
+  </media>
+  
+</figure></para><para id="eip-479">You will be focusing on the signal processing tasks, which will be implemented in <link url="http://developer.android.com/tools/sdk/ndk" window="new">native C</link> code. For those that are interested in the Android Java specifics, we will provide an optional tutorial that shows you how to build the project from scratch, explains the different Android classes that were used, and along the way, provides supplemental links to references and other useful Android tutorials available on the web.</para></section><section id="eip-640"><title>Part 1: Getting Started with Android and Eclipse</title><para id="eip-87">In this section, you first setup your Android device in development mode, import a skeleton project into Eclipse, and familiarize yourself with the Android project structure and build process.</para><section id="eip-334"><title>Setting Up the Google Nexus for Development</title><para id="eip-191">On the tablet, you must enable the <code>Developer options</code> under <code>Settings</code>:
+<list id="nexusdev" list-type="enumerated" number-style="arabic"><item>Go to <code>Settings</code>,</item>
+<item>Click on <code>About tablet</code>,</item>
+<item>Click <code>Build number</code> seven times (yes, 7).</item>
+</list></para><para id="eip-888">Under <code>Settings &gt; Developer options</code>, enable the <code>Stay awake</code> and <code>USB debugging</code> options.
+</para></section><section id="eip-11"><title>Setting Up Eclipse</title><para id="eip-998">The development environment you will be using is the <link url="https://developer.nvidia.com/tegra-android-development-pack" window="new">Nvidia Tegra Android Development Pack 2.0</link>. To get started:</para><list id="eip-142" list-type="enumerated" number-style="arabic"><item>Start Cygwin by double-clicking on <code>C:\NvPack\cygwin\cygwin.bat</code></item>
+<item>In the prompt, navigate to the Eclipse folder by typing <code>cd /cygdrive/c/NvPack/eclipse</code></item>
+<item>Launch Eclipse with <code>./eclipse</code></item></list><note id="eip-259"><link url="http://www.cygwin.com/" window="new">Cygwin</link> provides a Linux-like environment for Windows, and launching Eclipse from within Cygwin is required for native C debugging to work correctly.</note><para id="eip-488">Choose a new workspace on your <code>U:</code> drive, similar to what you did in Lab 0. This step feels familiar because CCS is actually based on the Eclipse framework.</para></section><section id="eip-590"><title>Importing the Project</title><para id="eip-466">Once Eclipse opens, select <code>File &gt; Import...</code>
+<list id="eip-434" list-type="enumerated" number-style="arabic"><item>General &gt; Existing Projects into Workspace</item>
+<item>V:\ece420\nexus\Lab4\</item>
+<item>Check "Copy into Workspace"</item></list>
+
+Close out of the "Welcome" screen.</para><para id="eip-592">Once the project is imported, it will try to build automatically. If you see a build error, you will need to define the $NDKROOT variable in your workspace:
+
+<list id="definendk" list-type="enumerated" number-style="arabic"><item>Go to <code>Project &gt; Properties</code></item>
+<item>Expand <code>C/C++ Build &gt; Environment</code></item>
+<item><code>Add...</code></item>
+<item><code>Name:</code> NDKROOT, <code>Value:</code> C:\NvPack\android-ndk-r8</item>
+</list></para></section><section id="eip-727"><title>Understanding the Android Project Structure</title><para id="eip-818">An Android project with Native code support has 4 main components:
+
+<list id="eip-658"><item><code>.\AndroidManifest.xml</code> - contains app-related information, such as project name, activities, and required peripherals (e.g., microphone).</item>
+<item><code>.\res\layout\main.xml</code> - describes the layout of the user interface. In our project, we define an <link url="http://developer.android.com/reference/android/widget/ImageView.html" window="new"><code>ImageView</code></link>, which is used to display the spectrogram.</item>
+<item><code>.\src\</code> - contains the Java source files.</item>
+<item><code>.\jni\</code> - contains the native C source and Make files.</item>
+</list></para><para id="eip-110">Use the <code>Project Explorer</code> (left pane in Eclipse) to open the different files and familiarize yourself with each component.</para></section><section id="eip-361"><title>Building the Project</title><para id="eip-172">Building the project actually consists of first building your Native C code as a library using <code>ndk-build</code>, and then building the Java code, which is responsible for loading the C library and executing your functions. </para><para id="eip-655">For this lab project, the build process in Eclipse has already been configured to build everything automatically, and so building your project is as simple as clicking <code>Project &gt; Build Project</code>.<note id="eip-936" type="tip">You may want to uncheck <code>Build Automatically</code>, and then build by first <code>Clean</code>ing the project and checking the "Immediately start build" option.</note></para></section><section id="eip-327"><title>C Syntax Support</title><para id="eip-343">Open <code>.\jni\process.c</code> in the Eclipse editor. This file contains the processing function, which is where you will implement your signal processing. If you see notifications for syntax errors, then in the <code>Project Explorer</code>, right-click on the project name and go to <code>Project Properties &gt; C/C++ General &gt; Paths and Symbols</code> and add the following three files into the <code>Include directories</code> for <code>GNU C</code>:
+
+<code id="eip-770" display="block">C:\NvPack\android-ndk-r8\platforms\android-9\arch-arm\usr\include
+C:\NvPack\android-ndk-r8\sources\cxx-stl\gnu-libstdc++\include
+C:\NvPack\android-ndk-r8\sources\cxx-stl\gnu-libstdc++\libs\armeabi-v7a\include
+</code></para></section></section><section id="eip-1"><title>Part 2: A Development Environment for Signal-Processing Applications</title><section id="eip-384"><title>Function Declarations in Java and C</title><para id="eip-452">In the <code>Lab4Activity</code> Java class, the following function declaration is made:
+
+</para><code id="eip-49" display="block">public static native void process(ShortBuffer inbuf, DoubleBuffer outbuf, int N);</code><exercise id="eip-481"><problem id="eip-156">
+  <para id="eip-965">
+Where is the Lab4Activity class defined?
+  </para>
+</problem>
+
+<solution id="eip-999">
+  <para id="eip-43">According to the <emphasis effect="italics">"Understanding the Android Project Structure"</emphasis> section in Part 1, you can find it in <code>Lab4Activity.java</code> in a sub-directory of <code>.\src\</code>
+  </para></solution>
+</exercise><para id="eip-741">Here, the <code>native</code> keyword states that <code>process()</code> is a Native C function. The first argument points to the Java-equivalent of a <code>short[N]</code> array, which holds a block of the 16-bit audio data. The second argument points to the Java-equivalent of a <code>double[N]</code> array, which you have to fill with data to visualize on-screen.</para><para id="eip-609">In <code>process.c</code>, the C-equivalent function declaration for <code>process()</code>, along with pointers to the input and output buffers have already been written for you. Appropriate header files have also been included, including the <link url="http://fftw.org/">FFTW</link> library, a popular C library for implementing the FFT.
+</para></section>
+
+<section id="eip-24"><title>Debugging in Java</title><para id="eip-354">To introduce the Java debugging environment, you will verify that the mechanism for using <emphasis effect="italics">test vectors</emphasis> is working correctly. First, in the <code>Lab4Activity</code> class definition, set the variable <code>FILE_INPUT</code> to <code>true</code>. Set a breakpoint on the line where <code>process()</code> is called.</para><para id="eip-600">Click <code>Run &gt; Debug</code>, and debug as an <code>Android Application</code>. The project will automatically rebuild if out-of-date, and should switch to the <code>Debug Perspective</code>. The application will automatically run and be halted at the set breakpoint.</para><para id="eip-645">Click <code>Window &gt; Show View &gt; Expressions</code> and add the following expression:
+<code>sb.get(0)</code>, which returns the <emphasis effect="italics">first</emphasis> value in the buffer. Verify that the value is correct by comparing to the values in the lookup table defined in <code>LOOKUP.java</code>. Repeat this for other values in the table to convince yourself that the test vector values were copied correctly.
+
+<note id="eip-437" type="tip">The <link url="http://developer.android.com/reference/" window="new">Android Reference</link> guide contains detailed information about the classes you will encounter in Java (e.g., the <link url="http://developer.android.com/reference/java/nio/ShortBuffer.html" window="new">ShortBuffer</link> class).
+</note></para><para id="eip-689">This process has shown you how to set breakpoints and single-step through Java code.</para><exercise id="eip-77"><problem id="eip-725">
+  <para id="eip-623">
+    What happens if you try to step <emphasis effect="italics">into</emphasis> the <code>process()</code> function?
+  </para>
+</problem>
+
+<solution id="eip-348">
+  <para id="eip-954">
+    The debugger will step <emphasis effect="italics">over</emphasis> the function because it is written in C.
+  </para>
+</solution>
+</exercise></section><section id="eip-0"><title>Debugging in C</title><para id="eip-36">Debugging in C is done using <code>ndk-gdb</code>, which is supported in Eclipse. To do this, first terminate any existing debug session and then on the Android device, exit the current application by hitting the home button.</para><para id="eip-914">To configure GDB, switch back to the <code>C/C++ Perspective</code> and do the following:</para><list id="eip-75" list-type="enumerated" number-style="arabic"><item>Click <code>Run &gt; Debug Configurations...</code></item>
+<item>Select <code>Android NDK Application</code> and press the <code>New</code> icon, and rename the configuration to <code>Lab4 (1)</code>.</item>
+<item>On the <code>Android</code> tab:
+<list id="subndk1" list-type="enumerated" number-style="lower-alpha"><item>Under <code>Project</code>, hit <code>Browse...</code> and select the current project.</item>
+<item>Under <code>Misc.</code>, select <code>Attach to the running application</code>.</item>
+</list></item>
+<item>On the <code>Debugger</code> tab:
+<list id="subndk2" list-type="enumerated" number-style="lower-alpha"><item>Select the <code>GDBserver Settings</code> tab.</item>
+<item>Use the <code>APK bundled</code> GDBserver.</item>
+</list></item>
+
+<item><code>Apply</code> the settings and <code>Close</code>.</item>
+</list><para id="eip-805">In order to launch GDB, you must first run the application on the Android device, and then attach GDB to the running application. To do this:<list id="eip-624" list-type="enumerated" number-style="arabic"><item>Set a breakpoint inside the <code>for</code> loop in <code>process.c</code>.</item>
+<item>Click <code>Run &gt; Run</code>. You should see the application launch on the Android device, ignoring any Java breakpoints that you have set. </item>
+<item>After the application starts, click <code>Run &gt; Debug As... &gt; Android NDK Application</code>. The <code>Debug Perspective</code> should launch again, but this time with <code>gdbserver debugger</code>. The processor will halt at the set C breakpoint.</item></list><note id="eip-100">If <code>Android NDK Application</code> does not show up, make sure that <code>Lab 4</code> is highlighted in the Project Explorer before trying to launch the debugger.</note></para><para id="eip-140">In the <code>Expressions</code> window, the <code>sb.get(0)</code> (which is a Java method) will have generated an error as we are now debugging in C. Verify that <code>inBuf</code> has the same values as the test vector look-up table by adding <code>inBuf[0]</code> to the list of expressions; check several different array indices.</para></section><section id="eip-984"><title>Exporting Variables to a File</title><para id="eip-48">A useful feature that is fully supported in CCS is the ability to export processor memory to a file, which can then be imported into MATLAB for further analysis. To enable this feature in Eclipse, the lab machines have the <link url="http://code.google.com/p/evars/" window="new">eVars</link> plugin installed.
+
+As an example, to export the <code>inBuf</code> array to file:
+<list id="eip-286" list-type="enumerated" number-style="arabic"><item>In the <code>Debug Perspective</code>, go to <code>Window &gt; Show View &gt; Variables</code>.</item>
+<item>Right-click on the <code>inBuf</code> pointer and select <code>Display as Array</code>.</item>
+<item>Click the <code>Expand Variables</code> icon multiple times until the entire array has been expanded.</item>
+<item>Once the array is fully expanded, click on the <code>Export Variables</code> icon, and save to a txt file.</item>
+<item>Use <link resource="evars2array.m">evars2array.m</link> to read in the text file into a MATLAB vector.</item></list></para><para id="eip-446">In the next lab, we will see how to create and write to a file on the Android device, and use <code>adb</code> to download this file to the host machine, directly from MATLAB.</para></section></section>
+
+<section id="eip-784"><title>Part 3: A Spectrogram Algorithm in MATLAB</title><para id="eip-134">As an initial step towards implementing the spectrogram in Android, you will first implement it in MATLAB. <link target-id="spectrogramblk"/> shows the components that your spectrogram algorithm should have; the ability to overlap, while important, will be left for extra credit, and is therefore optional.
+
+<figure id="spectrogramblk"><title>Spectrogram Components</title><media id="sblk" alt="Overlap-&gt;Window-&gt;Zero-pad-&gt;FFT-&gt;Magnitude squared-&gt;log()">
+    <image mime-type="image/jpeg" src="../../media/stft_block.jpg" width="512"/>
+  </media>
+  
+</figure></para><note id="eip-872" type="tip">If you need to see an existing implementation, type <code>open spectrogram</code> in the MATLAB prompt. This will open the spectrogram function you used in the Prelab.</note><para id="eip-106">When implementing your spectrogram algorithm, make the following assumptions:
+<list id="eip-154"><item>use a Hamming window</item>
+<item>the window length is N=256</item>
+<item>zero-pad by a factor of 2</item>
+<item>do not overlap</item></list></para><para id="eip-189">Here are some things to keep in mind:
+<list id="eip-1890"><item>do not vectorize your code or use MATLAB-specific helper functions that are not available on the tablet (such as <code>zeros()</code> or <code>norm()</code>), as you want to make porting it to C as straightforward as possible.</item>
+<item>Retain only half of the FFT output, as it is conjugate symmetric (make sure you know why!)</item>
+<item>If X = Xr + jXi is a complex number, the <emphasis effect="italics">magnitude squared</emphasis> operation computes Xr^2 + Xi^2.</item>
+<item>Because power can vary by orders of magnitude, the <emphasis effect="italics">Log</emphasis> computation is used to reduce the dynamic range of the spectrogram output; this is useful when visualizing the data.</item></list></para><exercise id="eip-426"><problem id="eip-379">
+  <para id="eip-522">If your input signal is 8192 samples long, then your spectrogram output can be thought of as a 256 x 32 real-valued matrix. Make sure to understand why. You can then use the <code>image()</code> or <code>imagesc()</code> functions in MATLAB to visualize the data.</para></problem></exercise></section><section id="eip-119"><title>Part 4: A C Implementation of the Spectrogram</title><section id="eip-126"><title>Specifications</title><para id="eip-433">Your task is to implement a C version of the spectrogram algorithm that you wrote in Part 3. Here are some guidelines for how to proceed:
+
+<list id="eip-696"><item>Remember you are doing block-based processing. Every time <code>process()</code> is called, <code>inBuf</code> has <code>N</code> samples available to be processed.</item>
+<item>Read <emphasis>Section 2.1</emphasis> of the <link url="http://www.fftw.org/fftw3.pdf" window="new">FFTW tutorial</link> to understand the data structures and function calls of the FFTW library.</item>
+<item>Remember that floating point is available on this processor.</item>
+<item>Use the test vector to verify that intermediate operations are being computed correctly (e.g., multiplication, zero-padding, log function, etc.).</item>
+<item>For <emphasis>extra credit</emphasis>, implement a scheme that allows for arbitrary overlapping. This may require modifying code in <code>Lab4Activity.java</code></item></list></para></section><section id="eip-975"><title>Scaling the Output</title><para id="eip-829">The values of <code>outBuf</code> must be between 0.0 and 1.0. This is because the output values are directly mapped to RGB colors, with each color channel being 8 bits. As the spectrogram output is generally not in between 0.0 and 1.0, you will need to find an appropriate mapping.</para><para id="eip-556">One possible mapping is to linearly scale and saturate the spectrogram output; you must determine the scaling parameters experimentally by processing real audio data. Here is an outline of one way to do this:<list id="eip-766"><item>Start up the GDB debugger and <code>Resume</code> with all breakpoints disabled.</item>
+<item>While playing a loud tone (i.e., generate in MATLAB and play out through headphones), set a breakpoint right before your <code>process()</code> function returns.</item>
+<item>Export the <code>inBuf</code> array to a file. Review <emphasis effect="italics">Part 2: Exporting Variables to a File</emphasis> if you don't remember how.</item>
+<item>Repeat this process for noise-only input.</item>
+<item>Import the two files into MATLAB to determine a suitable dynamic range.</item></list><note id="eip-933" type="tip">This method also enables you to verify the functional correctness of your C code by exporting the spectrogram <emphasis>output</emphasis> to a file.</note></para></section><section id="eip-120"><title>Quiz Information</title><para id="eip-734">
+Be able to describe the effects of windowing and zero-padding on FFT spectral analysis. Know basic properties of the Fourier transform, DTFT, and DFT. What are the trade-offs between block-based and sample-by-sample processing? Although we did not require you to implement it, understand the effects of overlapping when computing the STFT. Understand the basic Android project structure and the relationship between Java and C programming for Android.
+</para></section></section></content>
+
+</document>

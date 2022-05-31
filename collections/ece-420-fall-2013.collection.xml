@@ -1,0 +1,129 @@
+<col:collection xmlns="http://cnx.rice.edu/collxml" xmlns:col="http://cnx.rice.edu/collxml" xmlns:cnxml="http://cnx.rice.edu/cnxml" xml:lang="en">
+  <metadata xmlns:md="http://cnx.rice.edu/mdml" mdml-version="0.5">
+  <md:content-id>col11560</md:content-id>
+  <md:title>ECE 420 Fall 2013</md:title>
+  
+  
+  <md:license url="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution License 3.0</md:license>
+  <md:language>en</md:language>
+
+  
+
+  
+  
+  
+  
+  
+
+  <md:uuid>7ece8687-8de9-4e26-80a1-39762b0b86ad</md:uuid>
+<md:slug>ece-420-fall-2013</md:slug>
+</metadata>
+
+  <col:content>
+    
+      <col:module document="m45656">
+        <col:featured-links>
+          
+            <cnxml:link-group type="supplemental">
+              <cnxml:link url="http://cnx.org/content/m45669/latest/">Lab 1: Prelab</cnxml:link>
+            </cnxml:link-group>
+          
+        </col:featured-links>
+      </col:module>
+        
+      
+    
+    
+      <col:module document="m45669">
+        <col:featured-links>
+          
+            <cnxml:link-group type="example">
+              <cnxml:link url="">Lab 1</cnxml:link>
+            </cnxml:link-group>
+          
+        </col:featured-links>
+      </col:module>
+        
+      
+    
+    
+      <col:module document="m45702"/>
+        
+      
+    
+    
+      <col:module document="m45706">
+        <col:featured-links>
+          
+            <cnxml:link-group type="supplemental">
+              <cnxml:link url="http://cnx.org/content/m45704/latest/">Lab 2: Prelab part II</cnxml:link>
+            </cnxml:link-group>
+          
+        </col:featured-links>
+      </col:module>
+        
+      
+    
+    
+      <col:module document="m45704"/>
+        
+      
+    
+    
+      <col:module document="m45710">
+        <col:featured-links>
+          
+            <cnxml:link-group type="prerequisite">
+              <cnxml:link url="http://cnx.org/content/m45704/latest/">Lab 2: Prelab part II</cnxml:link>
+            </cnxml:link-group>
+          
+        </col:featured-links>
+      </col:module>
+        
+      
+    
+    
+      <col:module document="m45719">
+        <col:featured-links>
+          
+            <cnxml:link-group type="supplemental">
+              <cnxml:link url="http://cnx.org/content/m45720/latest/">Lab 3: Prelab (Part 2)</cnxml:link>
+            </cnxml:link-group>
+          
+        </col:featured-links>
+      </col:module>
+        
+      
+    
+    
+      <col:module document="m45720"/>
+        
+      
+    
+    
+      <col:module document="m45743"/>
+        
+      
+    
+    
+      <col:module document="m45766"/>
+        
+      
+    
+    
+      <col:module document="m45767"/>
+        
+      
+    
+    
+      <col:module document="m45780"/>
+        
+      
+    
+    
+      <col:module document="m47714"/>
+        
+      
+    
+  </col:content>
+</col:collection>
