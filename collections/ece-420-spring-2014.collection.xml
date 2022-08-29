@@ -1,213 +1,86 @@
-<col:collection xmlns="http://cnx.rice.edu/collxml" xmlns:md="http://cnx.rice.edu/mdml" xmlns:col="http://cnx.rice.edu/collxml" xmlns:cnxml="http://cnx.rice.edu/cnxml" xml:lang="en">
+<?xml version="1.0"?>
+<col:collection xmlns="http://cnx.rice.edu/collxml" xmlns:md="http://cnx.rice.edu/mdml" xmlns:col="http://cnx.rice.edu/collxml" xmlns:cnxml="http://cnx.rice.edu/cnxml" xml:lang="en" authors="Trong Nguyen">
   <metadata xmlns:md="http://cnx.rice.edu/mdml" mdml-version="0.5">
-  <md:content-id>col11618</md:content-id>
-  <md:title>ECE 420 Spring 2014</md:title>
-  
-  
-  <md:license url="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution License 3.0</md:license>
-  <md:language>en</md:language>
-
-  
-
-  
-  
-  
-  
-  
-
-  <md:uuid>b41f7245-1144-458e-9947-2767fdcdf9b7</md:uuid>
-<md:slug>ece-420-spring-2014</md:slug>
-</metadata>
-
+    <md:content-id>col11618</md:content-id>
+    <md:title>ECE 420 Spring 2014</md:title>
+    <md:license url="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution License 3.0</md:license>
+    <md:language>en</md:language>
+    <md:uuid>b41f7245-1144-458e-9947-2767fdcdf9b7</md:uuid>
+    <md:slug>ece-420-spring-2014</md:slug>
+  </metadata>
   <col:content>
-    
-      
-        
-      <col:subcollection>
-        <md:title>Lab 0</md:title>
-        
-        
-        
-
-        <col:content>
-          
-    
-      <col:module document="m45656">
-        <col:featured-links>
-          
+    <col:subcollection>
+      <md:title>Lab 0</md:title>
+      <col:content>
+        <col:module document="m45656">
+          <col:featured-links>
             <cnxml:link-group type="supplemental">
               <cnxml:link url="http://cnx.org/content/m45669/latest/">Lab 1: Prelab</cnxml:link>
             </cnxml:link-group>
-          
-        </col:featured-links>
-      </col:module>
-        
-      
-    
-        </col:content>
-      </col:subcollection>
-    
-    
-      
-        
-      <col:subcollection>
-        <md:title>Lab 1</md:title>
-        
-        
-        
-
-        <col:content>
-          
-    
-      <col:module document="m45669">
-        <col:featured-links>
-          
+          </col:featured-links>
+        </col:module>
+      </col:content>
+    </col:subcollection>
+    <col:subcollection>
+      <md:title>Lab 1</md:title>
+      <col:content>
+        <col:module document="m45669">
+          <col:featured-links>
             <cnxml:link-group type="example">
               <cnxml:link url="">Lab 1</cnxml:link>
             </cnxml:link-group>
-          
-        </col:featured-links>
-      </col:module>
-        
-      
-    
-    
-      <col:module document="m45702"/>
-        
-      
-    
-        </col:content>
-      </col:subcollection>
-    
-    
-      
-        
-      <col:subcollection>
-        <md:title>Lab 2</md:title>
-        
-        
-        
-
-        <col:content>
-          
-    
-      <col:module document="m45706">
-        <col:featured-links>
-          
+          </col:featured-links>
+        </col:module>
+        <col:module document="m45702"/>
+      </col:content>
+    </col:subcollection>
+    <col:subcollection>
+      <md:title>Lab 2</md:title>
+      <col:content>
+        <col:module document="m45706">
+          <col:featured-links>
             <cnxml:link-group type="supplemental">
               <cnxml:link url="http://cnx.org/content/m45704/latest/">Lab 2: Prelab part II</cnxml:link>
             </cnxml:link-group>
-          
-        </col:featured-links>
-      </col:module>
-        
-      
-    
-    
-      <col:module document="m45704"/>
-        
-      
-    
-    
-      <col:module document="m45710">
-        <col:featured-links>
-          
+          </col:featured-links>
+        </col:module>
+        <col:module document="m45704"/>
+        <col:module document="m45710">
+          <col:featured-links>
             <cnxml:link-group type="prerequisite">
               <cnxml:link url="http://cnx.org/content/m45704/latest/">Lab 2: Prelab part II</cnxml:link>
             </cnxml:link-group>
-          
-        </col:featured-links>
-      </col:module>
-        
-      
-    
-        </col:content>
-      </col:subcollection>
-    
-    
-      
-        
-      <col:subcollection>
-        <md:title>Lab 3</md:title>
-        
-        
-        
-
-        <col:content>
-          
-    
-      <col:module document="m45719">
-        <col:featured-links>
-          
+          </col:featured-links>
+        </col:module>
+      </col:content>
+    </col:subcollection>
+    <col:subcollection>
+      <md:title>Lab 3</md:title>
+      <col:content>
+        <col:module document="m45719">
+          <col:featured-links>
             <cnxml:link-group type="supplemental">
               <cnxml:link url="http://cnx.org/content/m45720/latest/">Lab 3: Prelab (Part 2)</cnxml:link>
             </cnxml:link-group>
-          
-        </col:featured-links>
-      </col:module>
-        
-      
-    
-    
-      <col:module document="m45720"/>
-        
-      
-    
-    
-      <col:module document="m45743"/>
-        
-      
-    
-        </col:content>
-      </col:subcollection>
-    
-    
-      
-        
-      <col:subcollection>
-        <md:title>Lab 4</md:title>
-        
-        
-        
-
-        <col:content>
-          
-    
-      <col:module document="m45766"/>
-        
-      
-    
-    
-      <col:module document="m45767"/>
-        
-      
-    
-        </col:content>
-      </col:subcollection>
-    
-    
-      
-        
-      <col:subcollection>
-        <md:title>Lab 5</md:title>
-        
-        
-        
-
-        <col:content>
-          
-    
-      <col:module document="m47714"/>
-        
-      
-    
-    
-      <col:module document="m45780"/>
-        
-      
-    
-        </col:content>
-      </col:subcollection>
-    
+          </col:featured-links>
+        </col:module>
+        <col:module document="m45720"/>
+        <col:module document="m45743"/>
+      </col:content>
+    </col:subcollection>
+    <col:subcollection>
+      <md:title>Lab 4</md:title>
+      <col:content>
+        <col:module document="m45766"/>
+        <col:module document="m45767"/>
+      </col:content>
+    </col:subcollection>
+    <col:subcollection>
+      <md:title>Lab 5</md:title>
+      <col:content>
+        <col:module document="m47714"/>
+        <col:module document="m45780"/>
+      </col:content>
+    </col:subcollection>
   </col:content>
 </col:collection>
